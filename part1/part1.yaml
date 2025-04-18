@@ -13,7 +13,7 @@ spec:
   cloudConfig:
     gceServiceAccount: default
   cloudProvider: gce
-  configBase: gs://<your-gs-bucket>/part1.k8s.local
+  configBase: gs://cca-self-work/part1.k8s.local
   containerRuntime: containerd
   etcdClusters:
   - cpuRequest: 200m
@@ -40,7 +40,7 @@ spec:
   networking:
     kubenet: {}
   nonMasqueradeCIDR: 100.64.0.0/10
-  project: <your-cloud-computing-architecture-gcp-project>
+  project: cca-self-work
   sshAccess:
   - 0.0.0.0/0
   subnets:
@@ -149,3 +149,4 @@ spec:
   - europe-west1
   zones:
   - europe-west1-b
+
