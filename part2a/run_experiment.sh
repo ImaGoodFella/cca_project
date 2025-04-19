@@ -26,8 +26,6 @@ INTERFERENCES=(
   "ibench-membw"
 )
 
-INTERFERENCE="ibench-cpu"
-
 for INTERFERENCE in "${INTERFERENCES[@]}"; do
   if [ "$INTERFERENCE" != "no_interference" ]; then
       echo "Setting up interference: $INTERFERENCE"
