@@ -18,7 +18,7 @@ chmod 700 ~/.ssh
 kops create secret --name part2a.k8s.local sshpublickey admin -i ~/.ssh/cloud-computing.pub
 
 # Deploy the cluster
-kops update cluster part2a.k8s.local --yes --admin
+kops update cluster --name part2a.k8s.local --yes --admin
 
 # Validate the cluster
 kops validate cluster --wait 10m
