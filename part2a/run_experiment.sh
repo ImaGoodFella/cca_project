@@ -2,7 +2,7 @@
 
 # Set up logging
 mkdir -p ../data/part2a
-exec > >(tee -a ../data/part2a/setup_log.txt) 2>&1
+exec > >(tee -a ../data/part2a/experiment_log.txt) 2>&1
 
 NUM_REPEATS=1
 
