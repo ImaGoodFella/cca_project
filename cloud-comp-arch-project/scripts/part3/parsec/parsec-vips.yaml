@@ -19,6 +19,8 @@ spec:
         resources:
           requests:
             cpu: "666m"
+          limits:
+            cpu: "667m"
       nodeSelector:
         cca-project-nodetype: node-a
       restartPolicy: Never
