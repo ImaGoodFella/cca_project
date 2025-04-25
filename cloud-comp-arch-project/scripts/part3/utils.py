@@ -54,14 +54,14 @@ def wait_for_pod(pod_name, state):
         args = shlex.split("kubectl get pods -o wide")
 
         kubectl_p = Popen(args, stdout=subprocess.PIPE)
-        grep_p = Popen(shlex.split(f"grep {state}"), stdin=kubectl_p.stdout, stdout=subprocess.PIPE, universal_newlines=True)
+        grep_p = Popen(shlex.split(f"grep {pod_name}"), stdin=kubectl_p.stdout, stdout=subprocess.PIPE, universal_newlines=True)
         kubectl_p.stdout.close()
         pod_properties, err_output = grep_p.communicate()
         
-        if pod_properties != "":
+        if pod_properties.split()[2] == state:
             break
 
-    print(f"Pod {pod_name} started.")
+    print(f"Pod {pod_name} is {state}.")
 
 def get_memcached_ip() -> str:
     command_line = f"kubectl get pods -o wide"

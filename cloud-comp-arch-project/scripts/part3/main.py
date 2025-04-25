@@ -36,11 +36,13 @@ def launch_mcperf():
 def launch_wait_batch_applications():
     PARSEC_DIR = "scripts/part3/parsec"
 
-    for f in os.listdir(PARSEC_DIR):
+    for idx, f in enumerate(os.listdir(PARSEC_DIR)):
+        # if f == "parsec-blackscholes.yaml":
         parsec_job_path = os.path.join(PARSEC_DIR, f)
         run_local_command(f"kubectl create -f {parsec_job_path}")
     
-    for f in os.listdir(PARSEC_DIR):
+    for idx, f in enumerate(os.listdir(PARSEC_DIR)):
+        # if f == "parsec-blackscholes.yaml":
         job_name = os.path.splitext(f)[0]
         wait_for_pod(job_name, "Completed")
 
@@ -74,19 +76,20 @@ def main():
 
 
     # STEP 7: Collect the data
-    pods_time_output, pods_time_output_err = run_local_command("kubectl get pods -o json", True)
-    pods_parsed_time = parse_time(pods_time_output)
-
     output_dir = make_exp_dir()
-    with open(os.join(output_dir, "mcperf.txt"), "w") as f:
+
+    with open(os.path.join(output_dir, "mcperf.txt"), "w") as f:
+        measurer_p.kill()
         f.write(measurer_p.communicate()[0])
-    with open(os.join(output_dir, "pods.json", "w")) as f:
-        f.write(pods_parsed_time)
+
+    pods_time_output, pods_time_output_err = run_local_command("kubectl get pods -o json", True)
+    with open(os.path.join(output_dir, "results.json"), "w") as f:
+        f.write(pods_time_output)
 
 
     # STEP 8: Delete cluster
     print("Deleting cluster.")
-    run_local_command("kops delete cluster part3.k8s.local --yes")
+    # run_local_command("kops delete cluster part3.k8s.local --yes")
 
     
 if __name__ == "__main__":

@@ -16,6 +16,9 @@ spec:
         image: anakli/cca:parsec_blackscholes
         imagePullPolicy: Always
         name: parsec-blackscholes
+        resources:
+          requests:
+            cpu: "1"
       nodeSelector:
         cca-project-nodetype: node-a
       restartPolicy: Never

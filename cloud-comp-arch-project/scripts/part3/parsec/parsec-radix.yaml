@@ -16,6 +16,9 @@ spec:
         image: anakli/cca:splash2x_radix
         imagePullPolicy: Always
         name: parsec-radix
+        resources:
+          requests:
+            cpu: "332m"
       nodeSelector:
         cca-project-nodetype: node-a
       restartPolicy: Never

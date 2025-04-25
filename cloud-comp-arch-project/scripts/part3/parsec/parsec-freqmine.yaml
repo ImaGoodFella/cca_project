@@ -17,5 +17,5 @@ spec:
         imagePullPolicy: Always
         name: parsec-freqmine
       nodeSelector:
-        cca-project-nodetype: node-d
+        cca-project-nodetype: node-c
       restartPolicy: Never

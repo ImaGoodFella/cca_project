@@ -2,14 +2,15 @@ import json
 import sys
 from datetime import datetime
 
-def parse_time(data):
+def parse_time(json_path):
     time_format = '%Y-%m-%dT%H:%M:%SZ'
-    json_file = json.loads(data)
+    file = open(json_path, 'r')
+    json_file = json.load(file)
 
     start_times = []
     completion_times = []
     for item in json_file['items']:
-        name = item['status']['containerStatuses'][0]['name']
+        name = item['status']["containerStatuses"][0]['name']
         print("Job: ", str(name))
         if str(name) != "memcached":
             try:
@@ -33,3 +34,6 @@ def parse_time(data):
     res = "Total time: {0}".format(max(completion_times) - min(start_times))
     print(res)
     return res
+
+if __name__ == "__main__":
+    parse_time(sys.argv[1])
