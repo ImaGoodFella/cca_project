@@ -8,8 +8,15 @@ exec > >(tee -a ../data/part1/setup_log.txt) 2>&1
 # Create the cluster
 echo "Creating the cluster now"
 
-PROJECT=`gcloud config get-value project`
-kops create -f part1.yaml
+username=lbenedett
+
+export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
+export PROJECT=$(gcloud config get-value project)
+
+temp_config=$(mktemp)
+envsubst < part1.yaml > $temp_config
+
+kops create -f $temp_config
 
 # Setup ssh keys
 mkdir -p ~/.ssh
@@ -83,3 +90,5 @@ MEASURE_PID=$!
 echo "Waiting for installations to complete..."
 wait $AGENT_PID $MEASURE_PID
 echo "All installations finished!"
+
+rm part1-subst.yaml
