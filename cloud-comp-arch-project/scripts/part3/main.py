@@ -47,6 +47,18 @@ def launch_wait_batch_applications():
         wait_for_pod(job_name, "Completed")
 
 def main():
+    # run_local_command("kubectl delete jobs --all")
+    # run_local_command("kubectl delete pods --all")
+
+    # agent_a_ip = get_external_ip("agent-a")
+    # agent_b_ip = get_external_ip("agent-b")
+    # measurer_ip = get_external_ip("measure")
+
+    # kill_mcperf_on_remote(measurer_ip)
+    # kill_mcperf_on_remote(agent_a_ip)
+    # kill_mcperf_on_remote(agent_b_ip)
+
+
     # STEP 1: Launch cluster
     print("Launching cluster.")
     run_local_command("/bin/bash ./scripts/part3/launch_cluster.sh")

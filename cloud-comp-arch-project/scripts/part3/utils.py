@@ -102,3 +102,7 @@ def build_mcperf_on_remote(server_ip: str):
     copy_on_remote(server_ip, "scripts/part3/compile_mcperf.sh")
     run_remote_command(server_ip, "/bin/bash ~/compile_mcperf.sh")
 
+def kill_mcperf_on_remote(server_ip):
+    copy_on_remote(server_ip, "scripts/part3/kill_running_process.sh")
+    run_remote_command(server_ip, "/bin/bash ~/kill_running_process.sh mcperf")
+
