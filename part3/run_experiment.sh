@@ -2,10 +2,10 @@
 set -euxo pipefail
 
 # Set up logging
-mkdir -p ../data/part3b
-exec > >(tee -a ../data/part3b/experiment_log.txt) 2>&1
+mkdir -p ../data/part3
+exec > >(tee -a ../data/part3/experiment_log.txt) 2>&1
 
-NUM_REPEATS=1
+NUM_REPEATS=3
 
 JOB_NAMES=(
   "parsec-blackscholes"
@@ -51,7 +51,7 @@ sleep 10
 echo "Starting measures on $CLIENT_MEASURE_NODE_NAME..."
 gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE_NODE_NAME" --zone europe-west1-b \
   --command "pkill mcperf || true; ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP --loadonly && ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_A_IP -a $INTERNAL_AGENT_B_IP --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 --scan 30000:30500:5" \
-  > "../data/part3b/mcperf_measure_log.txt" 2>&1 &
+  > "../data/part3/mcperf_measure_log.txt" 2>&1 &
 
 #Function to run and time a job
 run_job() {
@@ -85,18 +85,19 @@ for i in $(seq 0 $((NUM_REPEATS - 1))); do
 
   echo "Jobs are finished"
 
-  kubectl get pods -o json > ../data/part3b/results_$i.json 2>&1
+  kubectl get pods -o json > ../data/part3/results_$i.json 2>&1
 
   for JOB_NAME in "${JOB_NAMES[@]}"; do
     kubectl delete jobs $JOB_NAME
   done
+
+  echo "End of loop; Waiting 10 seconds ..."
+  sleep 10
 done
 
-# Load and measure constantly memcache latency
-echo "Killing process on $CLIENT_MEASURE_NODE_NAME..."
+
+
+# Kill process on client-agent
+echo "Killing measurements on $CLIENT_MEASURE_NODE_NAME..."
 gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE_NODE_NAME" --zone europe-west1-b \
   --command "pkill mcperf || true"
-
-echo "Tearing down memcache ..."
-kubectl delete services some-memcached-11211
-kubectl delete pods some-memcached

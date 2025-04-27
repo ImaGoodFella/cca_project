@@ -2,7 +2,7 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
   creationTimestamp: null
-  name: part3b.k8s.local
+  name: part3.k8s.local
 spec:
   api:
     loadBalancer:
@@ -13,7 +13,7 @@ spec:
   cloudConfig:
     gceServiceAccount: default
   cloudProvider: gce
-  configBase: ${KOPS_STATE_STORE}part3b.k8s.local
+  configBase: ${KOPS_STATE_STORE}part3.k8s.local
   containerRuntime: containerd
   etcdClusters:
   - cpuRequest: 200m
@@ -36,7 +36,7 @@ spec:
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.31.5
-  masterPublicName: api.part3b.k8s.local
+  masterPublicName: api.part3.k8s.local
   networking:
     kubenet: {}
   nonMasqueradeCIDR: 100.64.0.0/10
@@ -62,7 +62,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: master-europe-west1-b
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -85,7 +85,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: client-measure
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -108,7 +108,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: client-agent-a
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -132,7 +132,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: client-agent-b
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -155,7 +155,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: node-a-2core
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -178,7 +178,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: node-b-2core
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -201,7 +201,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: node-c-4core
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
@@ -225,7 +225,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: part3b.k8s.local
+    kops.k8s.io/cluster: part3.k8s.local
   name: node-d-4core
 spec:
   image: ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20250130
