@@ -1,8 +1,9 @@
 #!/bin/bash
+set -euxo pipefail
 
 # Set up logging
-mkdir -p ../data/part3
-exec > >(tee -a ../data/part3/setup_log.txt) 2>&1
+mkdir -p ../data/part3b
+exec > >(tee -a ../data/part3b/setup_log.txt) 2>&1
 
 
 # Create the cluster
@@ -14,7 +15,7 @@ export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
 export PROJECT=$(gcloud config get-value project)
 
 temp_config=$(mktemp)
-envsubst < part3.yaml > $temp_config
+envsubst < part3b.yaml > $temp_config
 
 kops create -f $temp_config
 
@@ -22,10 +23,10 @@ kops create -f $temp_config
 mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 [ -f ~/.ssh/cloud-computing ] || ssh-keygen -t rsa -b 4096 -f ~/.ssh/cloud-computing
-kops create secret --name part3.k8s.local sshpublickey admin -i ~/.ssh/cloud-computing.pub
+kops create secret --name part3b.k8s.local sshpublickey admin -i ~/.ssh/cloud-computing.pub
 
 # Deploy the cluster
-kops update cluster --name part3.k8s.local --yes --admin
+kops update cluster --name part3b.k8s.local --yes --admin
 
 # Validate the cluster
 kops validate cluster --wait 10m
@@ -34,7 +35,6 @@ kops validate cluster --wait 10m
 kubectl get nodes -o wide
 
 echo "Cluster is up and running"
-
 
 # Installing memcached
 echo "Installing memcached..."

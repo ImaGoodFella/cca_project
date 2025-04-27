@@ -1,0 +1,25 @@
+e2-highmem-2, 2 CPU, 16 GiB
+n2-highcpu-2, 2 CPU, 2 GiB
+c3-highcpu-4, 4 CPU, 8 GiB
+n2-standard-4, 4 CPU, 16 GiB
+
+// memcache: 1 CPU, cpu interference
+blackscholes: 1 CPU, friendly, little memory
+// canneal: 2 CPU, LLC interference, lots of memory
+dedup: 1 CPU, LLC interference, lots of memory
+ferret: 2 CPU, L1i interference + LLC interference, lots of memory 
+// freqmine: 4 CPU, CPU interference, lots of memory
+// radix: 1 CPU, friendly, unknown memory
+// vips: 1 CPU, friendly, medium memory
+
+radix and vips, co-scheduled on the same core
+
+A: e2-highmem-2 -> memcache, blackscholes
+B: n2-highcpu-2 -> canneal
+C: c3-highcpu-4 -> freqmine
+D: n2-standard-4 -> dedup/radix/vips, ferret
+
+A: blackscholes, radix, vips
+B: canneal, dedup
+C: freqmine
+D: ferret, memcache
