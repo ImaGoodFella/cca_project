@@ -1,9 +1,11 @@
 #!/bin/bash
 set -euxo pipefail
 
+REPEAT=$1
+
 # Set up logging
 mkdir -p ../data/part3
-exec > >(tee -a ../data/part3/setup_log.txt) 2>&1
+exec > >(tee -a ../data/part3/setup_log_$REPEAT.txt) 2>&1
 
 
 # Create the cluster

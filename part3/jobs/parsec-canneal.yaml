@@ -12,10 +12,10 @@ spec:
         name: parsec-canneal
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["-c", "taskset -c 0,1 ./run -a run -S parsec -p canneal -i native -n 2"]
+        args: ["-c", "taskset -c 0,1 ./run -a run -S parsec -p canneal -i native -n 4"]
         resources:
           requests:
-            cpu: "1.8"
+            cpu: "0.8"
           limits: 
             cpu: "2"
       restartPolicy: Never

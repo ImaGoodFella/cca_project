@@ -15,9 +15,9 @@ ferret: 2 CPU, L1i interference + LLC interference, lots of memory
 radix and vips, co-scheduled on the same core
 
 A: e2-highmem-2 -> memcache, blackscholes
-B: n2-highcpu-2 -> canneal
+B: n2-highcpu-2 -> canneal, radix
 C: c3-highcpu-4 -> freqmine
-D: n2-standard-4 -> dedup/radix/vips, ferret
+D: n2-standard-4 -> dedup/vips, ferret
 
 A: blackscholes, radix, vips
 B: canneal, dedup

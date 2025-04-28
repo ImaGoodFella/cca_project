@@ -1,6 +1,6 @@
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 time_format = '%Y-%m-%dT%H:%M:%SZ'
@@ -17,10 +17,12 @@ for item in json_file['items']:
             start_time = datetime.strptime(
                     item['status']['containerStatuses'][0]['state']['terminated']['startedAt'],
                     time_format)
+            #print(start_time.replace(tzinfo=timezone.utc).timestamp())
             completion_time = datetime.strptime(
                     item['status']['containerStatuses'][0]['state']['terminated']['finishedAt'],
                     time_format)
             print("Job time: ", completion_time - start_time)
+            print("Start time: ", start_time)
             start_times.append(start_time)
             completion_times.append(completion_time)
         except KeyError:
