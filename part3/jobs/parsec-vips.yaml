@@ -12,12 +12,12 @@ spec:
         name: parsec-vips
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["-c", "taskset -c 1 ./run -a run -S parsec -p vips -i native -n 2"]
+        args: ["-c", "taskset -c 1 ./run -a run -S parsec -p vips -i native -n 1"]
         resources:
           requests:
-            cpu: "0.8"
+            cpu: "0.4"
           limits:
-            cpu: "1"
+            cpu: "0.8"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-b-2core"
+        cca-project-nodetype: "node-d-4core"
