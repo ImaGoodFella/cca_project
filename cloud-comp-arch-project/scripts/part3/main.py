@@ -101,8 +101,9 @@ def main():
 
     # STEP 8: Delete cluster
     print("Deleting cluster.")
-    # run_local_command("kops delete cluster part3.k8s.local --yes")
+    run_local_command("kops delete cluster part3.k8s.local --yes")
 
     
 if __name__ == "__main__":
-    main()
+    for i in range(2):
+        main()
