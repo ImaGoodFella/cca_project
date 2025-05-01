@@ -17,5 +17,5 @@ spec:
         imagePullPolicy: Always
         name: parsec-radix
       nodeSelector:
-        cca-project-nodetype: node-a
+        cca-project-nodetype: node-d
       restartPolicy: Never

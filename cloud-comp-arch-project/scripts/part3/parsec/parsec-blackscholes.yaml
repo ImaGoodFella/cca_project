@@ -10,7 +10,7 @@ spec:
       containers:
       - args:
         - -c
-        - taskset -c 0 ./run -a run -S parsec -p blackscholes -i native -n 1
+        - taskset -c 1 ./run -a run -S parsec -p blackscholes -i native -n 1
         command:
         - /bin/sh
         image: anakli/cca:parsec_blackscholes

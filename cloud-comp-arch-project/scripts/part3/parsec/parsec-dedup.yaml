@@ -16,9 +16,6 @@ spec:
         image: anakli/cca:parsec_dedup
         imagePullPolicy: Always
         name: parsec-dedup
-        resources:
-          limits:
-            cpu: "333m"
       nodeSelector:
-        cca-project-nodetype: node-b
+        cca-project-nodetype: node-d
       restartPolicy: Never
