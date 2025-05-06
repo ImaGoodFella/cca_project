@@ -115,6 +115,18 @@ install_mcperf() {
     "
 }
 
+install_psutils() {
+  local NODE_NAME=$1
+  echo "Installing psutils on $NODE_NAME..."
+  
+  gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME" --zone europe-west1-b \
+    --command "
+      # Ensure psutil is installed
+      sudo apt-get update && sudo apt-get install -y python3-pip 
+      pip3 install psutil --break-system-packages
+    "
+}
+
 # Install on both nodes in parallel
 install_mcperf "$CLIENT_AGENT_NODE_NAME" &
 AGENT_PID=$!
@@ -129,4 +141,10 @@ MEMCACHE_ID_PID=$!
 # Wait for both installations to complete
 echo "Waiting for installations to complete..."
 wait $MEMCACHE_ID_PID $AGENT_PID $MEASURE_PID
+
+install_psutils "$MEMCACHE_SERVER_NODE_NAME" &
+PSUTIL_PID=$!
+
+wait $PSUTIL_PID
+
 echo "All installations finished!"

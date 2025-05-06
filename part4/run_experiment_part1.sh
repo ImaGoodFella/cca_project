@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set up logging
-mkdir -p ../data/part4
-exec > >(tee -a ../data/part4/experiment_log.txt) 2>&1
+mkdir -p ../data/part4/task1
+exec > >(tee -a ../data/part4/task1/experiment_log.txt) 2>&1
 
 CLIENT_AGENT_NODE_NAME=$(kubectl get nodes --no-headers | grep client-agent | awk '{print $1}')
 CLIENT_MEASURE_NODE_NAME=$(kubectl get nodes --no-headers | grep client-measure | awk '{print $1}')
@@ -28,12 +28,137 @@ for i in $(seq 1 $NUM_RUNS); do
   mkdir -p "$RESULTS_DIR/run_$i"
 done
 
+# Function to start CPU monitoring in the background
+start_cpu_monitoring() {
+  local NODE_NAME=$1
+  local OUTPUT_CSV=$2
+  local INTERVAL=0.1  # Monitor every 0.1 seconds
+  
+  echo "Starting CPU monitoring on $NODE_NAME..."
+  
+  # Start the monitoring script on the remote machine
+  gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME" --zone europe-west1-b \
+    --command "
+    # Create the monitoring script
+    cat > /tmp/monitor_cpu.py << 'EOF'
+#!/usr/bin/env python3
+import psutil
+import time
+import sys
+
+# Get command line arguments
+interval = float(sys.argv[1])
+output_file = sys.argv[2]
+
+print(f'Starting CPU monitoring with interval={interval}s')
+
+# Open file for writing
+with open(output_file, 'w') as f:
+    # Write header - only include as many cores as the system has
+    cpu_count = len(psutil.cpu_percent(percpu=True))
+    header = 'timestamp,' + ','.join([f'core{i}' for i in range(cpu_count)])
+    f.write(header + '\n')
+    f.flush()
+
+    while True:
+        # Get per-CPU utilization
+        cores = psutil.cpu_percent(interval=None, percpu=True)
+        t = time.time_ns()  # Use milliseconds for timestamp
+        
+        # Format the output line
+        values = ','.join([str(core) for core in cores])
+        line = f'{t},{values}'
+        
+        # Write to file
+        f.write(line + '\n')
+        f.flush()
+        
+        # Sleep for the specified interval
+        time.sleep(interval)
+EOF
+    
+    # Make the script executable
+    chmod +x /tmp/monitor_cpu.py
+    
+    # Kill any existing monitoring scripts
+    pkill monitor_cpu.py || true
+    sleep 1
+
+    # Start the monitoring script in the background
+    nohup python3 /tmp/monitor_cpu.py $INTERVAL /tmp/cpu_stats.csv > /tmp/monitor_cpu.log 2>&1 &
+    
+    # Save the PID
+    echo \$! > /tmp/monitor_cpu.pid
+    
+    # Verify it's running
+    sleep 2
+    if [ -f /tmp/cpu_stats.csv ] && [ \$(wc -l < /tmp/cpu_stats.csv) -gt 1 ]; then
+      echo \"CPU monitoring started successfully with PID \$(cat /tmp/monitor_cpu.pid)\"
+      head -n 2 /tmp/cpu_stats.csv
+    else
+      echo \"ERROR: CPU monitoring failed to start properly\"
+      cat /tmp/monitor_cpu.log
+      exit 1
+    fi
+  "
+    
+  echo "CPU monitoring started on $NODE_NAME"
+}
+
+# Function to stop CPU monitoring and download the results
+stop_cpu_monitoring() {
+  local NODE_NAME=$1
+  local LOCAL_CSV=$2
+  
+  echo "Stopping CPU monitoring on $NODE_NAME..."
+  
+  # Stop the monitoring process
+  gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME" --zone europe-west1-b \
+    --command "
+    if [ -f /tmp/monitor_cpu.pid ]; then
+      PID=\$(cat /tmp/monitor_cpu.pid)
+      echo \"Stopping CPU monitoring process with PID \$PID\"
+      kill \$PID || true
+      sleep 2
+      
+      # Force kill if still running
+      if ps -p \$PID > /dev/null; then
+        echo \"Process still running, force killing...\"
+        kill -9 \$PID || true
+      fi
+      
+      rm /tmp/monitor_cpu.pid
+      
+      # Check if data was collected
+      if [ -f /tmp/cpu_stats.csv ]; then
+        echo \"Collected \$(wc -l < /tmp/cpu_stats.csv) CPU samples\"
+      else
+        echo \"WARNING: No CPU data file found\"
+      fi
+    else
+      echo \"No monitoring PID file found\"
+    fi
+    "
+  
+  # Download the CSV file
+  echo "Downloading CPU stats from $NODE_NAME..."
+  gcloud compute scp --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME:/tmp/cpu_stats.csv" "$LOCAL_CSV" --zone europe-west1-b
+  
+  # Verify the file was downloaded successfully
+  if [ -f "$LOCAL_CSV" ]; then
+    echo "CPU monitoring data saved to $LOCAL_CSV ($(wc -l < "$LOCAL_CSV") samples)"
+  else
+    echo "ERROR: Failed to download CPU data"
+  fi
+}
+
 for i in $(seq 1 $NUM_RUNS); do
   for core_list in "${CORE_LISTS[@]}"; do
     for threads in "${NUM_THREADS[@]}"; do
 
       # Create a unique results file for each experiment
       RESULTS_FILE="$RESULTS_DIR/run_${i}/${core_list}_cpu_${threads}_threads.txt"
+      CPU_CSV="$RESULTS_DIR/run_${i}/${core_list}_cpu_${threads}_threads_cpu.csv"
 
       echo "Running experiment with core list: $core_list and threads: $threads"
       
@@ -116,6 +241,10 @@ for i in $(seq 1 $NUM_RUNS); do
 
       # Give the agent more time to start and stabilize
       sleep 10
+      
+      # Start CPU monitoring before running the benchmark
+      start_cpu_monitoring "$MEMCACHE_SERVER_NODE_NAME" "$CPU_CSV"
+      sleep 2
 
       # First load data into memcached then run benchmark
       echo "Loading data into memcached from $CLIENT_MEASURE_NODE_NAME..."
@@ -137,10 +266,14 @@ for i in $(seq 1 $NUM_RUNS); do
         # Run benchmark with more moderate parameters to avoid sync issues
         echo 'Running benchmark...'
         ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 5 --scan 5000:220000:5000
-        " > "$RESULTS_FILE"
+        " > "$RESULTS_FILE" 2>&1
+      
+      # Stop CPU monitoring after benchmark completes
+      stop_cpu_monitoring "$MEMCACHE_SERVER_NODE_NAME" "$CPU_CSV"
       
       echo "Experiment completed for core list: $core_list and threads: $threads"
       echo "Results saved to $RESULTS_FILE"
+      echo "CPU data saved to $CPU_CSV"
     done
   done
 done
