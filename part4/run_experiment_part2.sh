@@ -32,10 +32,10 @@ done
 for i in $(seq 1 $NUM_RUNS); do
 
   # Create a unique results file for each experiment
-  RESULTS_FILE="$RESULTS_DIR/run_${i}/${core_list}_cpu_${threads}_threads.txt"
-  SCHEDULER_FILE="$RESULTS_DIR/run_${i}/${core_list}_scheduler_output.txt"
+  RESULTS_FILE="$RESULTS_DIR/run_${i}/${CORE_LIST}_cpu_${NUM_THREADS}_threads.txt"
+  SCHEDULER_FILE="$RESULTS_DIR/run_${i}/${CORE_LIST}_scheduler_output.txt"
 
-  echo "Running experiment with core list: $core_list and threads: $threads"
+  echo "Running experiment with core list: $CORE_LIST and threads: $NUM_THREADS"
   
   # Restart memcached on the server
   echo "Restarting memcache on $MEMCACHE_SERVER_NODE_NAME..."
@@ -60,8 +60,8 @@ for i in $(seq 1 $NUM_RUNS); do
     echo \"Using IP: \$INTERNAL_IP for memcached\"
 
     # Use the actual parameters from the loop
-    THREADS=$threads
-    CORE_LIST='$core_list'
+    THREADS=$NUM_THREADS
+    CORE_LIST='$CORE_LIST'
     echo \"Starting memcached with \$THREADS threads on cores \$CORE_LIST\"
 
     # Start memcached manually in background with output redirected
@@ -150,14 +150,13 @@ for i in $(seq 1 $NUM_RUNS); do
   echo "Running scheduler.py on memcache server..."
   gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$MEMCACHE_SERVER_NODE_NAME" --zone europe-west1-b \
   --command "
-    python3 scheduler.py
-  " > "$SCHEDULER_FILE" 2>&1 &
+    python3 scheduler.py $MEMCACHED_IP
+  " 
+  # > "$SCHEDULER_FILE" 2>&1 &
+
   scheduler_process=$!
 
-
   wait $memcached_process $scheduler_process
-  
-  echo "Experiment completed for core list: $core_list and threads: $threads"
 
   echo "Results saved to $RESULTS_FILE"
   echo "Scheduler output saved to $SCHEDULER_FILE"
