@@ -115,15 +115,31 @@ install_mcperf() {
     "
 }
 
-install_psutils() {
+install_pythonutils() {
   local NODE_NAME=$1
-  echo "Installing psutils on $NODE_NAME..."
+  echo "Installing pythonutils on $NODE_NAME..."
   
   gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME" --zone europe-west1-b \
     --command "
       # Ensure psutil is installed
       sudo apt-get update && sudo apt-get install -y python3-pip 
       pip3 install psutil --break-system-packages
+      pip3 install docker --break-system-packages
+    "
+}
+
+install_docker() {
+  local NODE_NAME=$1
+  echo "Installing Docker on $NODE_NAME..."
+  
+  gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$NODE_NAME" --zone europe-west1-b \
+    --command "
+      # Install Docker
+      sudo apt-get update
+      sudo apt-get install -y docker.io
+      sudo systemctl start docker
+      sudo systemctl enable docker
+      sudo usermod -aG docker \$USER
     "
 }
 
@@ -142,9 +158,7 @@ MEMCACHE_ID_PID=$!
 echo "Waiting for installations to complete..."
 wait $MEMCACHE_ID_PID $AGENT_PID $MEASURE_PID
 
-install_psutils "$MEMCACHE_SERVER_NODE_NAME" &
-PSUTIL_PID=$!
-
-wait $PSUTIL_PID
+install_docker "$MEMCACHE_SERVER_NODE_NAME"
+install_pythonutils "$MEMCACHE_SERVER_NODE_NAME"
 
 echo "All installations finished!"

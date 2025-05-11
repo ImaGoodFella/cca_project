@@ -1,120 +1,259 @@
-import re
-import socket
+import docker
+from time import sleep
+from typing import List, Dict, Any
 import time
-from typing import Optional
+from os import getpid
 
-# MemcachedClient and MemcachedStats taken and modified from:
-# https://github.com/czanoli/ETH-Cloud-Computing-Architectures-2024/blob/master/scheduler.py
+import psutil
+import sys
 
-# hyperparameters
-poll_interval = 0.10 # 100ms
-max_qps_one_core = 29_000
-max_cpu_threshold = 45 # out of 200
+from datetime import datetime
+from get_qps import MemcachedStats
 
-ONE_S_IN_NS = 1e9
-ONE_S_IN_US = 1e6
+# Start scheduler on CPU 0
+p = psutil.Process(getpid())
+p.cpu_affinity([0])
+print(f"{datetime.now().isoformat()} start scheduler", flush=True)
 
-class MemcachedClient:
-    _client = None
-    _buffer = b''
-    _stat_regex = re.compile(r"STAT (.*) (.*)\r")
+# Start memcached on CPU 0 and 1
+try:
+    memcache_cores = [0, 1]
+    memcached_id = [p.pid for p in psutil.process_iter(['name']) if p.info['name'] == 'memcached'][0]
+    memcached = psutil.Process(memcached_id)
+    memcached.cpu_affinity([0, 1])
+    print(f"{datetime.now().isoformat()} start memcached {memcache_cores} {len(memcache_cores)}", flush=True)
+except:
+    pass
 
-    def __init__(self, host='localhost', port=11211):
-        self._host = host
-        self._port = port
+docker_client = docker.from_env()
 
-    @property
-    def client(self):
-        if self._client is None:
-            self._client = socket.create_connection((self._host, self._port))
-        return self._client
+image_dict = {
+    "blackscholes": "anakli/cca:parsec_blackscholes",
+    "canneal": "anakli/cca:parsec_canneal",
+    "dedup": "anakli/cca:parsec_dedup",
+    "ferret": "anakli/cca:parsec_ferret",
+    "freqmine": "anakli/cca:parsec_freqmine",
+    "radix": "anakli/cca:splash2x_radix",
+    "vips": "anakli/cca:parsec_vips",
+}
 
-    def read_until(self, delim):
-        while delim not in self._buffer:
-            data = self.client.recv(1024)
-            if not data: # socket closed
-                return None
-            self._buffer += data
-        line,_,self._buffer = self._buffer.partition(delim)
-        return line
+scaling = [1.70, 1.70, 1.70, 1.95, 1.95, 1.95, 1.95]
+duration = [100, 220, 16, 288, 394, 43, 82]
+interference = [9, 9, 10, 11, 11, 8, 11]
 
-    def command(self, cmd):
-        self.client.send(("%s\n" % cmd).encode('ascii'))
-        buf = self.read_until(b'END')
-        assert(buf is not None)
-        return buf.decode('ascii')
+jobs = list(zip(image_dict.keys(), scaling, duration, interference))
 
-    def stats(self):
-        return dict(self._stat_regex.findall(self.command('stats')))
+start_queue = sorted(jobs, key=lambda x: (x[3], -x[2], x[1]), reverse=False)
 
-class MemcachedStats:
-    get_count = 0
-    set_count = 0
-    last_readings = []
+class Job:
+    def __init__(self, name, scaling, duration, inteference):
+        self.name = name
+        self.scaling = scaling
+        self.duration = duration
+        self.interference = inteference
+        self.image_name = image_dict[name]
+        self.container = None
+        self.cpuset_cpus = ""
+        self.start_time = None  # Initialize start_time to None
 
-    def __init__(self, host) -> None:
-        self.client = MemcachedClient(host=host, port=11211)
-        self.read()
-        self.last_readings = []
+    def __repr__(self):
+        return f"Job({self.name}, {self.scaling}, {self.duration}, {self.interference})"
+    
+    def is_scaling_job(self):
+        return self.scaling > 1.9 and self.interference > 10
+    
+    def set_container(self, container):
+        self.container = container
+        self.start_time = time.time()
+    
+    def update_cpusets_cpu(self, additional_cpus):
+        self.cpuset_cpus += f",{additional_cpus}" if self.cpuset_cpus else additional_cpus
 
-    def read(self):
-        stats = self.client.stats()
-        curr_get_count = int(stats['cmd_get'])
-        get_diff = curr_get_count - self.get_count
-        self.get_count = curr_get_count
-        self.last_readings.append((time.time_ns(), get_diff))
-        self.cleanup()
+        self.container.reload()
+        if self.container.status == 'running':
+            self.container.update(cpuset_cpus=self.cpuset_cpus)
 
-    def cleanup(self):
-        now = time.time_ns()
-        delete_before = None
-        for i, (t, _) in reversed(list(enumerate(self.last_readings))):
-            if now - t > ONE_S_IN_NS:
-                delete_before = i
-                break
+    def remove_cpu(self, cpu):
+        # Fix the remove_cpu method
+        cpu_list = self.cpuset_cpus.split(",")
+        if cpu in cpu_list:
+            cpu_list.remove(cpu)
+            self.cpuset_cpus = ",".join(cpu_list)
+            self.container.update(cpuset_cpus=self.cpuset_cpus)
 
-        if delete_before is not None:
-            del self.last_readings[:delete_before]
-
-    # queries received in the last count*10ms
-    def last_measurements(self, count=10):
-        total_get_after = 0
-        summed = 0
-        start = time.time_ns()
-        end = 0
-        for i, (t, g) in enumerate(reversed(self.last_readings)):
-            if i >= count:
-                break
-            start = min(start, t)
-            end = max(end, t)
-            total_get_after += g
-            summed += 1
-
-        time_diff = abs(end-start)
-        if time_diff == 0:
-            return 0
-        else:
-            return int((total_get_after) / ((end-start)/ONE_S_IN_NS))
-
-    def qps(self):
-        return self.last_measurements(int(1/poll_interval))
-
-
-if __name__ == "__main__":
-
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python scheduler.py <host>")
-        sys.exit(1)
+    def runtime(self):
+        if self.start_time:
+            return time.time() - self.start_time
+        return 0
+    
+    def is_finished(self):
+        if not self.container:
+            return False        
+        try:
+            self.container.reload()
+            return self.container.status == 'exited'
+        except:
+            # Container might be removed already
+            return True
         
-    host = sys.argv[1]
-    stats = MemcachedStats(host=host)
 
-    print("Scheduler started")
-    from time import sleep
 
-    for i in range(1000):
-        start = time.time()
-        stats.read()
-        print(stats.qps(), flush=True)
-        time.sleep(max(0, 0.1 - (time.time() - start)))
+start_queue = [Job(*job) for job in start_queue]
+curr_jobs: List[Job] = []
+
+avail_cpus = ["2", "3"]
+
+memcached_stats = MemcachedStats(sys.argv[1])
+
+cpu_1_used = False
+cpu_1_job = None
+
+client = docker.from_env()
+
+polling_interval = 0.1
+prev_qps = 0
+
+while len(start_queue) > 0 or len(curr_jobs) > 0:
+
+    # Check if any job has finished
+    for job in curr_jobs:
+        if job.is_finished():
+
+            # Free up the CPUs that were allocated to this job
+            job_cpus = [int(a) for a in job.cpuset_cpus.split(",")]
+            for cpu in job_cpus:
+                if cpu and cpu not in avail_cpus:
+                    avail_cpus.append(str(cpu))
+            
+            curr_jobs.remove(job)
+            if job == cpu_1_job:
+                cpu_1_job = None
+
+            print(f"{datetime.now().isoformat()} end {job.name}", flush=True)
+            print(f"{datetime.now().isoformat()} custom {job.name} released {job_cpus}", flush=True)
+
+    # Get the current CPU and QPS
+    cpu_cores_usage = psutil.cpu_percent(interval=None, percpu=True)
+    
+    memcached_stats.read()
+    qps = memcached_stats.last_measurements()
+
+    if abs(prev_qps - qps) > 10000:
+        print(f"{datetime.now().isoformat()} custom memcached new QPS: {qps}", flush=True)
+        prev_qps = qps
+
+    if (qps < 100000) and not cpu_1_used and not ("1" in avail_cpus):
+
+        cpu_1_used = True
+        
+        avail_cpus.insert(0, "1")
+        
+        try:
+            memcached.cpu_affinity([0])
+        except:
+            pass
+
+        print(f"{datetime.now().isoformat()} updated_cores memcached [0]", flush=True)
+
+    elif ("1" in avail_cpus or cpu_1_used) and not (qps < 100000):
+        
+        cpu_1_used = False
+
+        if "1" in avail_cpus:
+            avail_cpus.remove("1")
+
+        if cpu_1_job is None:
+            continue
+    
+        if len(cpu_1_job.cpuset_cpus.split(",")) == 1:
+            cpu_1_job.container.pause()
+            curr_jobs.remove(cpu_1_job)
+            start_queue.insert(0, cpu_1_job)
+            cpu_1_job.cpuset_cpus = ""
+            print(f"{datetime.now().isoformat()} pause {cpu_1_job.name}", flush=True)
+            cpu_1_job = None
+        else:
+            cpu_1_job.remove_cpu("1")
+            print(f"{datetime.now().isoformat()} updated_cores {cpu_1_job.name} [0]", flush=True)
+            print(f"{datetime.now().isoformat()} custom {cpu_1_job.name} released CPU 1", flush=True)
+
+        try:
+            memcached.cpu_affinity([0, 1])
+        except:
+            pass
+        print(f"{datetime.now().isoformat()} updated_cores memcached [0, 1]", flush=True)
+
+    if len(avail_cpus) == 0:
+        sleep(polling_interval)
+        continue
+            
+    avail_cpu = avail_cpus.pop(0)
+
+    # If we have a scaling job, we do not need to pop
+    if len(start_queue) == 0:
+        scaling_jobs = [job for job in curr_jobs if job.is_scaling_job()] or curr_jobs
+    else:
+        scaling_jobs = [job for job in curr_jobs if job.is_scaling_job()]
+
+    if len(scaling_jobs) > 0:
+        scaling_job = scaling_jobs[0]
+
+        scaling_job.update_cpusets_cpu(avail_cpu)
+
+        cpuset_cpus = [int(a) for a in scaling_job.cpuset_cpus.split(",")]
+
+        print(f"Added CPU {avail_cpu} to {scaling_job.name}", flush=True)
+        print(f"{datetime.now().isoformat()} updated_cores {scaling_job.name} {cpuset_cpus}", flush=True)
+        continue
+    
+    if len(start_queue) == 0:
+        # No more jobs to start
+        sleep(polling_interval)
+        continue
+
+    #
+    job = start_queue.pop(0)
+
+    # Job already started but was paused
+    if job.container is not None:
+        
+        curr_jobs.append(job)
+        job.container.update(cpuset_cpus=avail_cpu)
+        job.cpuset_cpus = avail_cpu
+        job.container.unpause()
+        
+        if avail_cpu == "1":
+            cpu_1_job = job
+        else:
+            print(f"{datetime.now().isoformat()} updated_cores {job.name} [{avail_cpu}]", flush=True)
+
+        print(f"{datetime.now().isoformat()} unpause {job.name}", flush=True)
+        continue
+
+    run_command = (
+        "./run -a run -S splash2x -p radix -i native -n 1"
+        if job.name == "radix"
+        else f"./run -a run -S parsec -p {job.name} -i native -n {3 if job.is_scaling_job() else 1}"
+    )
+    
+    container = client.containers.run(
+        image=job.image_name,
+        command=run_command,
+        detach=True,
+        remove=True,
+        name="parsec-" + job.name,
+        cpuset_cpus=avail_cpu,
+    )
+
+    
+    job.set_container(container)
+    job.cpuset_cpus = avail_cpu
+    curr_jobs.append(job)
+
+    if avail_cpu == "1":
+        cpu_1_job = job
+
+    print(f"{datetime.now().isoformat()} start {job.name} {[int(a) for a in avail_cpu]} {3 if job.is_scaling_job() else 1}", flush=True)
+
+
+print(f"{datetime.now().isoformat()} end scheduler", flush=True)
