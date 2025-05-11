@@ -22,7 +22,7 @@ NUM_THREADS=2
 NUM_RUNS=3
 
 # Create a directory for results
-RESULTS_DIR="../data/part4/task1"
+RESULTS_DIR="../data/part4/task2"
 
 for i in $(seq 1 $NUM_RUNS); do
   mkdir -p "$RESULTS_DIR/run_$i"
