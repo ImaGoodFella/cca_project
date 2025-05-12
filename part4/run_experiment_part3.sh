@@ -160,10 +160,22 @@ for i in $(seq 1 $NUM_RUNS); do
 
   echo "Benchmark process completed"
 
-  # Delete the first 3 lines of the results file
+  # Clean up the results file properly
   echo "Cleaning up results file..."
-  sed -i '1,3d' "$RESULTS_FILE"
-
+  # First, check if the file exists and has content
+  if [ -s "$RESULTS_FILE" ]; then
+    # Remove the first 3 lines once
+    sed -i '1,3d' "$RESULTS_FILE"
+    
+    # Remove the last 10 lines with a single command
+    total_lines=$(wc -l < "$RESULTS_FILE")
+    if [ "$total_lines" -gt 10 ]; then
+      sed -i "$((total_lines - 9)),$total_lines d" "$RESULTS_FILE"
+    fi
+  else
+    echo "Warning: Results file is empty or does not exist"
+  fi
+    
   echo "Results saved to $RESULTS_FILE"
   echo "Scheduler output saved to $SCHEDULER_FILE"
 
