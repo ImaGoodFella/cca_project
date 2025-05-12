@@ -1,0 +1,71 @@
+Client Agent Node: client-agent-t4l4
+Client Measure Node: client-measure-zktc
+Internal Agent IP: 10.0.16.5
+Memcached IP: 10.0.16.4
+Running experiment with core list: 0,1 and threads: 2
+Restarting memcache on memcache-server-xnq0...
+Synchronizing state of memcached.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable memcached
+Using IP: 10.0.16.4 for memcached
+Starting memcached with 2 threads on cores 0,1
+142411
+ubuntu    142411  0.0  0.0 264232  4480 ?        Sl   12:43   0:00 memcached -m 1024 -l 10.0.16.4 -t 2
+Memcached started successfully
+Starting mcperf agent on client-agent-t4l4...
+Starting mcperf agent...
+15779
+ubuntu     15779  0.0  0.0  94880  8320 ?        Sl   12:44   0:00 ./mcperf -T 8 -A
+mcperf agent started successfully
+Loading data into memcached from client-measure-zktc...
+Copying python files to memcache server...
+Running scheduler.py on memcache server...
+Scheduler process completed
+Benchmark process completed
+Cleaning up results file...
+Results saved to ../data/part4/task4/mcperf_1.txt
+Scheduler output saved to ../data/part4/task4/jobs_1.txt
+Running experiment with core list: 0,1 and threads: 2
+Restarting memcache on memcache-server-xnq0...
+Synchronizing state of memcached.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable memcached
+Using IP: 10.0.16.4 for memcached
+Starting memcached with 2 threads on cores 0,1
+146391
+ubuntu    146391  0.0  0.0 264232  4352 ?        Sl   12:58   0:00 memcached -m 1024 -l 10.0.16.4 -t 2
+Memcached started successfully
+Starting mcperf agent on client-agent-t4l4...
+Starting mcperf agent...
+16007
+ubuntu     16007  0.0  0.0  94880  8320 ?        Sl   12:58   0:00 ./mcperf -T 8 -A
+mcperf agent started successfully
+Loading data into memcached from client-measure-zktc...
+Copying python files to memcache server...
+Running scheduler.py on memcache server...
+Scheduler process completed
+Benchmark process completed
+Cleaning up results file...
+Results saved to ../data/part4/task4/mcperf_2.txt
+Scheduler output saved to ../data/part4/task4/jobs_2.txt
+Running experiment with core list: 0,1 and threads: 2
+Restarting memcache on memcache-server-xnq0...
+Synchronizing state of memcached.service with SysV service script with /usr/lib/systemd/systemd-sysv-install.
+Executing: /usr/lib/systemd/systemd-sysv-install disable memcached
+Using IP: 10.0.16.4 for memcached
+Starting memcached with 2 threads on cores 0,1
+150326
+ubuntu    150326  0.0  0.0 264232  4352 ?        Sl   13:13   0:00 memcached -m 1024 -l 10.0.16.4 -t 2
+Memcached started successfully
+Starting mcperf agent on client-agent-t4l4...
+Starting mcperf agent...
+16224
+ubuntu     16224  0.0  0.0  94880  8320 ?        Sl   13:13   0:00 ./mcperf -T 8 -A
+mcperf agent started successfully
+Loading data into memcached from client-measure-zktc...
+Copying python files to memcache server...
+Running scheduler.py on memcache server...
+Scheduler process completed
+Benchmark process completed
+Cleaning up results file...
+Results saved to ../data/part4/task4/mcperf_3.txt
+Scheduler output saved to ../data/part4/task4/jobs_3.txt
+All experiments completed successfully!
