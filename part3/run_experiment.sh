@@ -53,6 +53,9 @@ gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE
   --command "pkill mcperf || true; ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP --loadonly && ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_A_IP -a $INTERNAL_AGENT_B_IP --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 --scan 30000:30500:5" \
   > "../data/part3/mcperf_measure_log_$REPEAT.txt" 2>&1 &
 
+# Let the measurements stabilize
+sleep 60
+
 #Function to run and time a job
 run_job() {
   local JOB=$1

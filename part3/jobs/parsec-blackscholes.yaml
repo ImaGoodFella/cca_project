@@ -20,4 +20,4 @@ spec:
             cpu: "1"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-a-2core"
+        cca-project-nodetype: "node-b-2core"

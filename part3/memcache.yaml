@@ -17,6 +17,6 @@ spec:
         limits:
           cpu: "1"
   nodeSelector:
-    cca-project-nodetype: "node-a-2core"
+    cca-project-nodetype: "node-b-2core"
 
 

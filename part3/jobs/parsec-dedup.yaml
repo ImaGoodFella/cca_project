@@ -15,9 +15,9 @@ spec:
         args: ["-c", "taskset -c 0 ./run -a run -S parsec -p dedup -i native -n 1"]
         resources:
           requests:
-            cpu: "0.1"
+            cpu: "0.8"
           limits:
-            cpu: "0.3"
+            cpu: "1.0"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-d-4core"
+        cca-project-nodetype: "node-c-4core"
