@@ -8,8 +8,18 @@ exec > >(tee -a ../data/part4/setup_log.txt) 2>&1
 # Create the cluster
 echo "Creating the cluster now"
 
-PROJECT=`gcloud config get-value project`
-kops create -f part4.yaml
+username=$1
+
+export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
+export PROJECT=$(gcloud config get-value project)
+
+temp_config=$(mktemp)
+envsubst < part4.yaml > $temp_config
+
+cat $temp_config
+sleep 1000000
+
+kops create -f $temp_config
 
 # Setup ssh keys
 mkdir -p ~/.ssh
