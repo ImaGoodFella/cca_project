@@ -130,7 +130,7 @@ for i in $(seq 1 $NUM_RUNS); do
     sleep 5
     
     # Run benchmark
-    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 1800 --qps_interval 10 --qps_min 5000 --qps_max 180000 --qps_seed 2333
+    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 840 --qps_interval 10 --qps_min 5000 --qps_max 180000 --qps_seed 2333
     " > "$RESULTS_FILE" 2>&1 &
   
   # Wait for the benchmark to finish
