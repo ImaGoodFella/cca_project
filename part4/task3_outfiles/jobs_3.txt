@@ -1,0 +1,135 @@
+2025-05-12T12:28:40.936906 start scheduler
+2025-05-12T12:28:40.944354 start memcached [0, 1] 2
+2025-05-12T12:28:40.957896 updated_cores memcached [0]
+2025-05-12T12:28:41.149001 start radix [1] 1
+2025-05-12T12:28:41.346145 start canneal [2] 1
+2025-05-12T12:28:41.570493 start blackscholes [3] 1
+2025-05-12T12:29:00.858338 pause radix
+2025-05-12T12:29:00.858665 updated_cores memcached [0, 1]
+2025-05-12T12:29:20.340862 updated_cores memcached [0]
+2025-05-12T12:29:20.375460 unpause radix
+2025-05-12T12:29:30.726518 pause radix
+2025-05-12T12:29:30.726726 updated_cores memcached [0, 1]
+2025-05-12T12:30:54.565371 end blackscholes
+2025-05-12T12:30:54.565408 custom blackscholes released [3]
+2025-05-12T12:30:54.609770 updated_cores radix [3]
+2025-05-12T12:30:54.609815 unpause radix
+2025-05-12T12:31:14.245943 end radix
+2025-05-12T12:31:14.245981 custom radix released [3]
+2025-05-12T12:31:14.534301 start dedup [3] 1
+2025-05-12T12:31:54.584143 end dedup
+2025-05-12T12:31:54.584190 custom dedup released [3]
+2025-05-12T12:31:54.854597 start freqmine [3] 3
+2025-05-12T12:31:54.965058 updated_cores memcached [0]
+2025-05-12T12:31:54.996454 updated_cores freqmine [3, 1]
+2025-05-12T12:31:55.351723 updated_cores freqmine [3]
+2025-05-12T12:31:55.351805 custom freqmine released CPU 1
+2025-05-12T12:31:55.352008 updated_cores memcached [0, 1]
+2025-05-12T12:31:55.458501 updated_cores memcached [0]
+2025-05-12T12:31:55.487553 updated_cores freqmine [3, 1]
+2025-05-12T12:31:55.741373 updated_cores freqmine [3]
+2025-05-12T12:31:55.742130 custom freqmine released CPU 1
+2025-05-12T12:31:55.742317 updated_cores memcached [0, 1]
+2025-05-12T12:31:55.847761 updated_cores memcached [0]
+2025-05-12T12:31:55.877956 updated_cores freqmine [3, 1]
+2025-05-12T12:32:00.276438 updated_cores freqmine [3]
+2025-05-12T12:32:00.276603 custom freqmine released CPU 1
+2025-05-12T12:32:00.276820 updated_cores memcached [0, 1]
+2025-05-12T12:32:20.591735 updated_cores memcached [0]
+2025-05-12T12:32:20.616556 updated_cores freqmine [3, 1]
+2025-05-12T12:32:40.819343 updated_cores freqmine [3]
+2025-05-12T12:32:40.819385 custom freqmine released CPU 1
+2025-05-12T12:32:40.819521 updated_cores memcached [0, 1]
+2025-05-12T12:32:50.308484 updated_cores memcached [0]
+2025-05-12T12:32:50.332102 updated_cores freqmine [3, 1]
+2025-05-12T12:33:11.077597 updated_cores freqmine [3]
+2025-05-12T12:33:11.077659 custom freqmine released CPU 1
+2025-05-12T12:33:11.077789 updated_cores memcached [0, 1]
+2025-05-12T12:33:17.562171 end canneal
+2025-05-12T12:33:17.562213 custom canneal released [2]
+2025-05-12T12:33:17.586692 updated_cores freqmine [3, 2]
+2025-05-12T12:33:18.525228 updated_cores memcached [0]
+2025-05-12T12:33:18.550938 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:33:18.591410 updated_cores freqmine [3, 2]
+2025-05-12T12:33:18.591450 custom freqmine released CPU 1
+2025-05-12T12:33:18.591566 updated_cores memcached [0, 1]
+2025-05-12T12:33:19.526868 updated_cores memcached [0]
+2025-05-12T12:33:19.561638 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:33:19.599156 updated_cores freqmine [3, 2]
+2025-05-12T12:33:19.599275 custom freqmine released CPU 1
+2025-05-12T12:33:19.599438 updated_cores memcached [0, 1]
+2025-05-12T12:33:30.834804 updated_cores memcached [0]
+2025-05-12T12:33:30.864546 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:33:40.067038 updated_cores freqmine [3, 2]
+2025-05-12T12:33:40.067078 custom freqmine released CPU 1
+2025-05-12T12:33:40.067196 updated_cores memcached [0, 1]
+2025-05-12T12:34:00.391333 updated_cores memcached [0]
+2025-05-12T12:34:00.415917 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:34:20.598563 updated_cores freqmine [3, 2]
+2025-05-12T12:34:20.598611 custom freqmine released CPU 1
+2025-05-12T12:34:20.598733 updated_cores memcached [0, 1]
+2025-05-12T12:34:30.432131 updated_cores memcached [0]
+2025-05-12T12:34:30.455304 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:34:40.665033 updated_cores freqmine [3, 2]
+2025-05-12T12:34:40.665067 custom freqmine released CPU 1
+2025-05-12T12:34:40.665180 updated_cores memcached [0, 1]
+2025-05-12T12:35:10.280328 updated_cores memcached [0]
+2025-05-12T12:35:10.303763 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:35:50.578164 updated_cores freqmine [3, 2]
+2025-05-12T12:35:50.578202 custom freqmine released CPU 1
+2025-05-12T12:35:50.578315 updated_cores memcached [0, 1]
+2025-05-12T12:36:40.082653 updated_cores memcached [0]
+2025-05-12T12:36:40.105219 updated_cores freqmine [3, 2, 1]
+2025-05-12T12:36:41.705227 end freqmine
+2025-05-12T12:36:41.705253 custom freqmine released [3, 2, 1]
+2025-05-12T12:36:41.896245 start ferret [3] 3
+2025-05-12T12:36:41.915339 updated_cores ferret [3, 2]
+2025-05-12T12:36:41.934594 updated_cores ferret [3, 2, 1]
+2025-05-12T12:37:21.057290 updated_cores ferret [3, 2]
+2025-05-12T12:37:21.057331 custom ferret released CPU 1
+2025-05-12T12:37:21.057445 updated_cores memcached [0, 1]
+2025-05-12T12:37:40.530838 updated_cores memcached [0]
+2025-05-12T12:37:40.559028 updated_cores ferret [3, 2, 1]
+2025-05-12T12:38:50.969000 updated_cores ferret [3, 2]
+2025-05-12T12:38:50.969063 custom ferret released CPU 1
+2025-05-12T12:38:50.969212 updated_cores memcached [0, 1]
+2025-05-12T12:39:00.001869 updated_cores memcached [0]
+2025-05-12T12:39:00.026304 updated_cores ferret [3, 2, 1]
+2025-05-12T12:39:27.786801 end ferret
+2025-05-12T12:39:27.786842 custom ferret released [3, 2, 1]
+2025-05-12T12:39:28.001947 start vips [3] 3
+2025-05-12T12:39:28.025397 updated_cores vips [3, 2]
+2025-05-12T12:39:28.048320 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:30.694354 updated_cores vips [3, 2]
+2025-05-12T12:39:30.694414 custom vips released CPU 1
+2025-05-12T12:39:30.694569 updated_cores memcached [0, 1]
+2025-05-12T12:39:40.752506 updated_cores memcached [0]
+2025-05-12T12:39:41.832642 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:43.583219 updated_cores vips [3, 2]
+2025-05-12T12:39:43.583509 custom vips released CPU 1
+2025-05-12T12:39:43.583679 updated_cores memcached [0, 1]
+2025-05-12T12:39:43.686627 updated_cores memcached [0]
+2025-05-12T12:39:44.405499 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:45.462801 updated_cores vips [3, 2]
+2025-05-12T12:39:45.462897 custom vips released CPU 1
+2025-05-12T12:39:45.463030 updated_cores memcached [0, 1]
+2025-05-12T12:39:45.566125 updated_cores memcached [0]
+2025-05-12T12:39:46.201209 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:47.329658 updated_cores vips [3, 2]
+2025-05-12T12:39:47.329702 custom vips released CPU 1
+2025-05-12T12:39:47.329827 updated_cores memcached [0, 1]
+2025-05-12T12:39:47.432882 updated_cores memcached [0]
+2025-05-12T12:39:48.074153 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:48.850192 updated_cores vips [3, 2]
+2025-05-12T12:39:48.850243 custom vips released CPU 1
+2025-05-12T12:39:48.850382 updated_cores memcached [0, 1]
+2025-05-12T12:39:49.262852 updated_cores memcached [0]
+2025-05-12T12:39:50.067328 updated_cores vips [3, 2, 1]
+2025-05-12T12:39:51.115603 updated_cores vips [3, 2]
+2025-05-12T12:39:51.115665 custom vips released CPU 1
+2025-05-12T12:39:51.115844 updated_cores memcached [0, 1]
+2025-05-12T12:40:10.279097 updated_cores memcached [0]
+2025-05-12T12:40:10.313554 updated_cores vips [3, 2, 1]
+2025-05-12T12:40:23.819254 end vips
+2025-05-12T12:40:23.819281 custom vips released [3, 2, 1]
+2025-05-12T12:40:23.919693 end scheduler
