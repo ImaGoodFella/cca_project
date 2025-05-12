@@ -10,6 +10,10 @@ import sys
 from datetime import datetime
 from get_qps import MemcachedStats
 
+do_not_use_core_1 = False
+verbose = False
+qps_cut_off = 110000
+
 # Start scheduler on CPU 0
 p = psutil.Process(getpid())
 p.cpu_affinity([0])
@@ -67,6 +71,11 @@ class Job:
         self.start_time = time.time()
     
     def update_cpusets_cpu(self, additional_cpus):
+
+        if additional_cpus in self.cpuset_cpus:
+            # CPU already in cpuset_cpus, no need to add
+            return
+        
         self.cpuset_cpus += f",{additional_cpus}" if self.cpuset_cpus else additional_cpus
 
         self.container.reload()
@@ -139,10 +148,10 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
     qps = memcached_stats.last_measurements()
 
     if abs(prev_qps - qps) > 10000:
-        print(f"{datetime.now().isoformat()} custom memcached new QPS: {qps}", flush=True)
+        if verbose: print(f"{datetime.now().isoformat()} custom memcached new QPS: {qps}", flush=True)
         prev_qps = qps
 
-    if (qps < 100000) and not cpu_1_used and not ("1" in avail_cpus):
+    if (qps < qps_cut_off) and not cpu_1_used and not ("1" in avail_cpus) and not do_not_use_core_1:
 
         cpu_1_used = True
         
@@ -155,7 +164,7 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
         print(f"{datetime.now().isoformat()} updated_cores memcached [0]", flush=True)
 
-    elif ("1" in avail_cpus or cpu_1_used) and not (qps < 100000):
+    elif ("1" in avail_cpus or cpu_1_used) and not (qps < qps_cut_off) and not do_not_use_core_1:
         
         cpu_1_used = False
 
@@ -163,6 +172,11 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
             avail_cpus.remove("1")
 
         if cpu_1_job is None:
+            try:
+                memcached.cpu_affinity([0, 1])
+            except:
+                pass
+            print(f"{datetime.now().isoformat()} updated_cores memcached [0, 1]", flush=True)
             continue
     
         if len(cpu_1_job.cpuset_cpus.split(",")) == 1:
@@ -174,20 +188,28 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
             cpu_1_job = None
         else:
             cpu_1_job.remove_cpu("1")
-            print(f"{datetime.now().isoformat()} updated_cores {cpu_1_job.name} [0]", flush=True)
+            print(f"{datetime.now().isoformat()} updated_cores {cpu_1_job.name} {[int(a) for a in cpu_1_job.cpuset_cpus.split(',')]}", flush=True)
             print(f"{datetime.now().isoformat()} custom {cpu_1_job.name} released CPU 1", flush=True)
 
         try:
             memcached.cpu_affinity([0, 1])
         except:
             pass
+
         print(f"{datetime.now().isoformat()} updated_cores memcached [0, 1]", flush=True)
+        
+
 
     if len(avail_cpus) == 0:
         sleep(polling_interval)
         continue
             
     avail_cpu = avail_cpus.pop(0)
+
+    if do_not_use_core_1 and avail_cpu == "1":
+        # If we are not using core 1, skip it
+        continue
+
 
     # If we have a scaling job, we do not need to pop
     if len(start_queue) == 0:
@@ -202,8 +224,12 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
         cpuset_cpus = [int(a) for a in scaling_job.cpuset_cpus.split(",")]
 
-        print(f"Added CPU {avail_cpu} to {scaling_job.name}", flush=True)
         print(f"{datetime.now().isoformat()} updated_cores {scaling_job.name} {cpuset_cpus}", flush=True)
+
+        if avail_cpu == "1":
+            cpu_1_job = scaling_job
+            cpu_1_used = True
+
         continue
     
     if len(start_queue) == 0:
@@ -224,6 +250,7 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
         
         if avail_cpu == "1":
             cpu_1_job = job
+            cpu_1_used = True
         else:
             print(f"{datetime.now().isoformat()} updated_cores {job.name} [{avail_cpu}]", flush=True)
 
@@ -252,6 +279,7 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
     if avail_cpu == "1":
         cpu_1_job = job
+        cpu_1_used = True
 
     print(f"{datetime.now().isoformat()} start {job.name} {[int(a) for a in avail_cpu]} {3 if job.is_scaling_job() else 1}", flush=True)
 

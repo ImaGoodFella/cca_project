@@ -114,23 +114,23 @@ for i in $(seq 1 $NUM_RUNS); do
   
   # First load data into memcached then run benchmark
   echo "Loading data into memcached from $CLIENT_MEASURE_NODE_NAME..."
+
   gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE_NODE_NAME" --zone europe-west1-b \
     --command "
     # Kill any existing mcperf processes
-    sudo pkill -9 mcperf || true 
+    sudo pkill -9 mcperf > /dev/null 2>&1 || true  
     sleep 1
     
     cd /home/ubuntu/memcache-perf-dynamic
     
     # Load data with higher timeout
-    ./mcperf -s $MEMCACHED_IP --loadonly
+    ./mcperf -s $MEMCACHED_IP --loadonly > /dev/null 2>&1
     
     # Wait a moment after loading
     sleep 5
     
-    # Run benchmark with more moderate parameters to avoid sync issues
-    echo 'Running benchmark...'
-    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 600 --qps_interval 10 --qps_min 5000 --qps_max 180000
+    # Run benchmark
+    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 10 --qps_interval 840 --qps_min 5000 --qps_max 180000
     " > "$RESULTS_FILE" 2>&1 &
   
   # Wait for the benchmark to finish
@@ -146,45 +146,23 @@ for i in $(seq 1 $NUM_RUNS); do
   --command "
     # Kill any existing docker processes
     docker kill \$(docker ps -a -q) > /dev/null 2>&1 || true
-    docker rm \$(docker ps -a -q) > /dev/null 2>&1 || true
     
     python3 scheduler.py $MEMCACHED_IP
   " > "$SCHEDULER_FILE" 2>&1 &
 
   scheduler_process=$!
 
-  wait $scheduler_process
+  #wait $scheduler_process
 
   echo "Scheduler process completed"
 
-  # Define timeout function
-  wait_with_timeout() {
-    local pid=$1
-    local timeout=60  # 60 seconds timeout
-    
-    # Start a timer in the background
-    (
-      sleep $timeout
-      # If still running after timeout, continue script execution
-      if kill -0 $pid 2>/dev/null; then
-        echo "Benchmark process taking too long (over $timeout seconds), continuing..."
-      fi
-    ) &
-    local timer_pid=$!
-    
-    # Wait for the process to finish
-    wait $pid 2>/dev/null || true
-    
-    # Kill the timer process if it's still running
-    kill $timer_pid 2>/dev/null || true
-  }
-  
-  # Wait for the benchmark with timeout
-  echo "Waiting for benchmark to complete (max 61 seconds)..."
-
-  wait_with_timeout $memcached_process
+  wait $memcached_process
 
   echo "Benchmark process completed"
+
+  # Delete the first 3 lines of the results file
+  echo "Cleaning up results file..."
+  sed -i '1,3d' "$RESULTS_FILE"
 
   echo "Results saved to $RESULTS_FILE"
   echo "Scheduler output saved to $SCHEDULER_FILE"
