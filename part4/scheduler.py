@@ -151,7 +151,7 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
         if verbose: print(f"{datetime.now().isoformat()} custom memcached new QPS: {qps}", flush=True)
         prev_qps = qps
 
-    if (qps < qps_cut_off) and not cpu_1_used and not ("1" in avail_cpus) and not do_not_use_core_1:
+    if (qps <= qps_cut_off) and not cpu_1_used and not ("1" in avail_cpus) and not do_not_use_core_1:
 
         cpu_1_used = True
         
@@ -164,7 +164,7 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
         print(f"{datetime.now().isoformat()} updated_cores memcached [0]", flush=True)
 
-    elif ("1" in avail_cpus or cpu_1_used) and not (qps < qps_cut_off) and not do_not_use_core_1:
+    elif ("1" in avail_cpus or cpu_1_used) and not (qps <= qps_cut_off) and not do_not_use_core_1:
         
         cpu_1_used = False
 
