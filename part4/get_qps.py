@@ -8,8 +8,6 @@ from typing import Optional
 
 # hyperparameters
 poll_interval = 0.10 # 100ms
-max_qps_one_core = 29_000
-max_cpu_threshold = 45 # out of 200
 
 ONE_S_IN_NS = 1e9
 ONE_S_IN_US = 1e6
