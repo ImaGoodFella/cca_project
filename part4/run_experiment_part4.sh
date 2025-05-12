@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set up logging
-mkdir -p ../data/part4/task2
-exec > >(tee -a ../data/part4/task2/experiment_log.txt) 2>&1
+mkdir -p ../data/part4/task4
+exec > >(tee -a ../data/part4/task4/experiment_log.txt) 2>&1
 
 CLIENT_AGENT_NODE_NAME=$(kubectl get nodes --no-headers | grep client-agent | awk '{print $1}')
 CLIENT_MEASURE_NODE_NAME=$(kubectl get nodes --no-headers | grep client-measure | awk '{print $1}')
@@ -22,7 +22,7 @@ NUM_THREADS=2
 NUM_RUNS=3
 
 # Create a directory for results
-RESULTS_DIR="../data/part4/task2"
+RESULTS_DIR="../data/part4/task4"
 
 for i in $(seq 1 $NUM_RUNS); do
 
@@ -130,7 +130,7 @@ for i in $(seq 1 $NUM_RUNS); do
     sleep 5
     
     # Run benchmark
-    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 10 --qps_interval 840 --qps_min 5000 --qps_max 180000
+    ./mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_IP --noload -T 8 -C 8 -D 4 -Q 1000 -c 8 -t 1800 --qps_interval 5 --qps_min 5000 --qps_max 180000 --qps_seed 2333
     " > "$RESULTS_FILE" 2>&1 &
   
   # Wait for the benchmark to finish
