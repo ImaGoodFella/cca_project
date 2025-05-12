@@ -210,7 +210,6 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
         # If we are not using core 1, skip it
         continue
 
-
     # If we have a scaling job, we do not need to pop
     if len(start_queue) == 0:
         scaling_jobs = [job for job in curr_jobs if job.is_scaling_job()] or curr_jobs
@@ -283,5 +282,13 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
     print(f"{datetime.now().isoformat()} start {job.name} {[int(a) for a in avail_cpu]} {3 if job.is_scaling_job() else 1}", flush=True)
 
+
+# Finally, free up CPU 1 if it was used
+if cpu_1_used:
+    try:
+        memcached.cpu_affinity([0, 1])
+    except:
+        pass
+    print(f"{datetime.now().isoformat()} updated_cores memcached [0, 1]", flush=True)
 
 print(f"{datetime.now().isoformat()} end scheduler", flush=True)
