@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-NUM_REPEATS=1
+NUM_REPEATS=3
 
 for ((i=0; i<$NUM_REPEATS; i++))
 do
