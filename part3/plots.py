@@ -18,6 +18,13 @@ colors = {
     "vips": "#cc0a00",
 }
 
+machines = {
+    "node-a-2core": "e2-highmem-2",
+    "node-b-2core": "n2-highcpu-2",
+    "node-c-4core": "c3-highcpu-4",
+    "node-d-4core": "n2-standard-4",
+}
+
 def main(data_folder, num_runs):
     for run in range(num_runs):
         latency_df = pd.read_csv(
@@ -60,8 +67,6 @@ def main(data_folder, num_runs):
         latency_df["ts_end"] -= global_start
 
         latency_df = latency_df[latency_df["ts_end"] > 0]
-
-        print(latency_df["p95"])
 
         fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(10, 8), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
 
@@ -131,7 +136,7 @@ def main(data_folder, num_runs):
 
         ax2.set_ylabel("Machine")
         ax2.set_yticks(range(len(nodes)))
-        ax2.set_yticklabels(nodes)
+        ax2.set_yticklabels(map(lambda x: machines[x], nodes))
 
         ax2.grid(visible=True, axis="x")
 
