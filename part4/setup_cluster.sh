@@ -140,6 +140,15 @@ install_docker() {
       sudo systemctl start docker
       sudo systemctl enable docker
       sudo usermod -aG docker \$USER
+
+      echo 'Downloading Docker images...'
+      sudo docker pull anakli/cca:parsec_blackscholes
+      sudo docker pull anakli/cca:parsec_canneal
+      sudo docker pull anakli/cca:parsec_dedup
+      sudo docker pull anakli/cca:parsec_ferret
+      sudo docker pull anakli/cca:parsec_freqmine
+      sudo docker pull anakli/cca:splash2x_radix
+      sudo docker pull anakli/cca:parsec_vips
     "
 }
 
