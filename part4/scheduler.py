@@ -87,9 +87,12 @@ class Job:
         cpu_list = self.cpuset_cpus.split(",")
         if cpu in cpu_list:
             cpu_list.remove(cpu)
-            self.cpuset_cpus = ",".join(cpu_list)
-            self.container.update(cpuset_cpus=self.cpuset_cpus)
 
+            self.container.reload()
+            if self.container.status == 'running':
+                self.cpuset_cpus = ",".join(cpu_list)
+                self.container.update(cpuset_cpus=self.cpuset_cpus)
+                
     def runtime(self):
         if self.start_time:
             return time.time() - self.start_time
@@ -180,12 +183,16 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
             continue
     
         if len(cpu_1_job.cpuset_cpus.split(",")) == 1:
-            cpu_1_job.container.pause()
-            curr_jobs.remove(cpu_1_job)
-            start_queue.insert(0, cpu_1_job)
-            cpu_1_job.cpuset_cpus = ""
-            print(f"{datetime.now().isoformat()} pause {cpu_1_job.name}", flush=True)
-            cpu_1_job = None
+            
+            cpu_1_job.container.reload()
+            if cpu_1_job.container.status == "running":
+                cpu_1_job.container.pause()
+                start_queue.insert(0, cpu_1_job)
+                print(f"{datetime.now().isoformat()} pause {cpu_1_job.name}", flush=True)
+                curr_jobs.remove(cpu_1_job)            
+                cpu_1_job.cpuset_cpus = ""
+                cpu_1_job = None
+            
         else:
             cpu_1_job.remove_cpu("1")
             print(f"{datetime.now().isoformat()} updated_cores {cpu_1_job.name} {[int(a) for a in cpu_1_job.cpuset_cpus.split(',')]}", flush=True)
@@ -241,7 +248,9 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
 
     # Job already started but was paused
     if job.container is not None:
-        
+        job.container.reload()
+
+    if job.container is not None and job.container.status == "paused":
         curr_jobs.append(job)
         job.container.update(cpuset_cpus=avail_cpu)
         job.cpuset_cpus = avail_cpu
@@ -254,6 +263,11 @@ while len(start_queue) > 0 or len(curr_jobs) > 0:
             print(f"{datetime.now().isoformat()} updated_cores {job.name} [{avail_cpu}]", flush=True)
 
         print(f"{datetime.now().isoformat()} unpause {job.name}", flush=True)
+        continue
+    elif job.container is not None:
+        # Job already started and not paused
+        curr_jobs.append(job)
+        avail_cpus.insert(0, avail_cpu)
         continue
 
     run_command = (
