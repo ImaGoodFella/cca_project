@@ -98,10 +98,6 @@ def plot_mcperf_log_file(ax, log_file):
     with open(log_file, 'r') as f:
         lines = f.readlines()
 
-    # Extract the 'Timestamp start' and 'Timestamp end' from the first two lines
-    timestamp_start = int(lines[0].split(':')[1].strip())
-    timestamp_end = int(lines[1].split(':')[1].strip())
-
     # Read the data into a pandas DataFrame, starting from the 3rd line (index 2)
     # We will use the columns based on your provided header information
     df = pd.read_csv(log_file, sep=r'\s+', header=2)
@@ -109,6 +105,8 @@ def plot_mcperf_log_file(ax, log_file):
     df['Timestamp'] = df.index * 10
 
     # Plot p95 on the left y-axis
+    ax.axhline(y=800, color='r', linestyle='--', linewidth=1)
+
     ax.plot(df['Timestamp'], df['p95'], color='tab:blue', label='p95', linewidth=2)
     ax.set_xlabel('Time (seconds)')
     ax.set_ylabel('p95', color='tab:blue')
