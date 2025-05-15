@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set up logging
-mkdir -p ../data/part4/task4_5
-exec > >(tee -a ../data/part4/task4_5/experiment_log.txt) 2>&1
+mkdir -p ../data/part4/task4
+exec > >(tee -a ../data/part4/task4/experiment_log.txt) 2>&1
 
 CLIENT_AGENT_NODE_NAME=$(kubectl get nodes --no-headers | grep client-agent | awk '{print $1}')
 CLIENT_MEASURE_NODE_NAME=$(kubectl get nodes --no-headers | grep client-measure | awk '{print $1}')
@@ -22,7 +22,7 @@ NUM_THREADS=2
 NUM_RUNS=3
 
 # Create a directory for results
-RESULTS_DIR="../data/part4/task4_5"
+RESULTS_DIR="../data/part4/task4"
 
 for i in $(seq 1 $NUM_RUNS); do
 
