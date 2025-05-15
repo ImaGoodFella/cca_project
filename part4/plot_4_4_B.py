@@ -127,7 +127,7 @@ def plot_cpu_cored(ax, job_log_file):
     ax.set_xlabel('Time (seconds)')
     ax.set_ylabel('Number of cores', color='tab:blue')
     ax.tick_params(axis='y', labelcolor='tab:blue')
-
+    ax.set_title('Number of cores over Time')
 
 def plot_mcperf_log_file(ax, log_file, job_log_file):
     # Read the log file, skipping the first two lines (for Timestamp start/end)
@@ -135,7 +135,7 @@ def plot_mcperf_log_file(ax, log_file, job_log_file):
         lines = f.readlines()
 
     df = pd.read_csv(log_file, sep=r'\s+', header=2)
-    df['Timestamp'] = df.index * 2
+    df['Timestamp'] = df.index * 3
 
     # Create a second y-axis to plot QPS
     ax_twin = ax.twinx()
@@ -143,14 +143,18 @@ def plot_mcperf_log_file(ax, log_file, job_log_file):
     ax_twin.set_ylabel('QPS', color='tab:green')
     ax_twin.tick_params(axis='y', labelcolor='tab:green')
 
+    ax.yaxis.set_visible(False)  # Hide y-axis ticks and labels
+    ax.spines['left'].set_visible(False)  # Hide left spine (axis line)
+
     # Title and show the plot
+    ax.set_title('QPS over Time')
     ax.set_xlabel('Time (seconds)')
     ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
 
 if __name__ == "__main__":
 
-    job_logs = ["task4_outfiles_2s/jobs_1.txt", "task4_outfiles_2s/jobs_2.txt", "task4_outfiles_2s/jobs_3.txt"]
-    mcperf_logs = ["task4_outfiles_2s/mcperf_1.txt", "task4_outfiles_2s/mcperf_2.txt", "task4_outfiles_2s/mcperf_3.txt"]
+    job_logs = ["task4_outfiles_3s/jobs_1.txt", "task4_outfiles_3s/jobs_2.txt", "task4_outfiles_3s/jobs_3.txt"]
+    mcperf_logs = ["task4_outfiles_3s/mcperf_1.txt", "task4_outfiles_3s/mcperf_2.txt", "task4_outfiles_3s/mcperf_3.txt"]
     for idx, job_log_file in enumerate(job_logs):
         fig, (ax_top, ax_middle, ax_bottom) = plt.subplots(
             nrows=3, ncols=1, figsize=(12, 10), sharex=True, gridspec_kw={'height_ratios': [2, 1, 1]})
