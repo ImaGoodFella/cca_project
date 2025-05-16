@@ -82,42 +82,43 @@ def plot_job_log_file(ax, log_file):
     ax.set_yticklabels(yticklabels)
     ax.set_xlabel("Time (seconds)")
     ax.set_title("Job Execution Timeline")
-    
+
     ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
     ax.xaxis.set_ticks_position('top')
     ax.xaxis.set_label_position('top')
     ax.tick_params(axis='x', which='both', bottom=False, top=True, labeltop=True, labelbottom=False)
 
-def plot_mcperf_p95_qps(ax, log_file):
+def plot_mcperf_p95_qps(ax_p95, ax_qps, log_file):
     df = pd.read_csv(log_file, sep=r'\s+', header=2)
     df['Timestamp'] = df.index * 10
 
-    # Left y-axis: p95
-    ax.axhline(y=800, color='r', linestyle='--', linewidth=1)
-    ax.plot(df['Timestamp'], df['p95'], color='tab:blue', label='p95', linewidth=2)
-    ax.set_ylabel('p95', color='tab:blue')
-    ax.tick_params(axis='y', labelcolor='tab:blue')
+    # P95 latency
+    ax_p95.axhline(y=800, color='r', linestyle='--', linewidth=1)
+    ax_p95.plot(df['Timestamp'], df['p95'], color='tab:blue', label='p95', linewidth=2)
+    ax_p95.set_ylabel('p95 latency (μs)', color='tab:blue')
+    ax_p95.tick_params(axis='y', labelcolor='tab:blue')
+    ax_p95.set_title('Memcached p95 latency over Time')
+    ax_p95.grid(True, linestyle='--', alpha=0.5)
 
-    # Right y-axis: QPS
-    ax_twin = ax.twinx()
-    ax_twin.plot(df['Timestamp'], df['QPS'], color='tab:green', label='QPS', linewidth=2)
-    ax_twin.set_ylabel('QPS', color='tab:green')
-    ax_twin.tick_params(axis='y', labelcolor='tab:green')
-
-    ax.set_xlabel('Time (seconds)')
-    ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
-    ax.set_title('Memcached p95 latency and QPS over Time')
+    # QPS
+    ax_qps.plot(df['Timestamp'], df['QPS'], color='tab:green', label='QPS', linewidth=2)
+    ax_qps.set_ylabel('QPS', color='tab:green')
+    ax_qps.set_xlabel('Time (seconds)')
+    ax_qps.tick_params(axis='y', labelcolor='tab:green')
+    ax_qps.set_title('Memcached QPS over Time')
+    ax_qps.grid(True, linestyle='--', alpha=0.5)
 
 if __name__ == "__main__":
-
     job_logs = ["task3_outfiles/jobs_1.txt", "task3_outfiles/jobs_2.txt", "task3_outfiles/jobs_3.txt"]
     mcperf_logs = ["task3_outfiles/mcperf_1.txt", "task3_outfiles/mcperf_2.txt", "task3_outfiles/mcperf_3.txt"]
+
     for idx, log_file in enumerate(job_logs):
-        fig, (ax_top, ax_bottom) = plt.subplots(
-            nrows=2, ncols=1, figsize=(12, 8), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
+        fig, (ax_top, ax_mid, ax_bottom) = plt.subplots(
+            nrows=3, ncols=1, figsize=(12, 10), sharex=True,
+            gridspec_kw={'height_ratios': [2, 1, 1]})
 
         plot_job_log_file(ax_top, log_file)
-        plot_mcperf_p95_qps(ax_bottom, mcperf_logs[idx])
+        plot_mcperf_p95_qps(ax_mid, ax_bottom, mcperf_logs[idx])
 
         plt.tight_layout()
         plt.savefig(f"part4_3/plot_A{idx+1}.png")
