@@ -88,7 +88,10 @@ def plot_mcperf_split(ax_p95, ax_qps, log_file):
     ax_p95.tick_params(axis='y', labelcolor='tab:blue')
     ax_p95.grid(True, linestyle='--', alpha=0.5)
 
-    # QPS
+    # QPS (y-axis on the right)
+    ax_qps.spines['right'].set_position(('outward', 0))
+    ax_qps.yaxis.set_label_position('right')
+    ax_qps.yaxis.tick_right()
     ax_qps.plot(df['Timestamp'], df['QPS'], color='tab:green', linewidth=2)
     ax_qps.set_ylabel('QPS', color='tab:green')
     ax_qps.set_xlabel('Time (seconds)')
