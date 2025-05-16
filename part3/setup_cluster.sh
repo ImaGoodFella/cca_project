@@ -11,10 +11,8 @@ exec > >(tee -a ../data/part3/setup_log_$REPEAT.txt) 2>&1
 # Create the cluster
 echo "Creating the cluster now"
 
-username=lbenedett
-
-export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
-export PROJECT=$(gcloud config get-value project)
+echo $KOPS_STATE_STORE
+echo $PROJECT
 
 temp_config=$(mktemp)
 envsubst < part3.yaml > $temp_config

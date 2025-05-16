@@ -104,6 +104,7 @@ def main(data_folder, num_runs):
         ax1.set_xticks(range(0, global_duration + 1, 10))
         ax1.set_xticklabels(range(0, global_duration + 1, 10))
 
+        ax1.set_yticks(range(0, 1200 + 1, 200))
         ax1.set_ylabel(r"Latency ($\mu$s)")
         ax1.set_ylim(0, 1500)
 

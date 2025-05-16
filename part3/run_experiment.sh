@@ -7,15 +7,6 @@ REPEAT=$1
 mkdir -p ../data/part3
 exec > >(tee -a ../data/part3/experiment_log_$REPEAT.txt) 2>&1
 
-JOB_NAMES=(
-  "parsec-blackscholes"
-  "parsec-canneal"
-  "parsec-dedup"
-  "parsec-ferret"
-  "parsec-freqmine"
-  "parsec-radix"
-  "parsec-vips"
-)
 
 # Create the memcached pod
 echo "Setting up memcached now"
@@ -54,11 +45,18 @@ gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE
   > "../data/part3/mcperf_measure_log_$REPEAT.txt" 2>&1 &
 
 # Let the measurements stabilize
-sleep 60
+sleep 90
 
 #Function to run and time a job
 run_job() {
   local JOB=$1
+
+  if [ -n "${2-}" ]; then
+    while [ ! -f "/tmp/$2" ]; do
+      echo "Waiting for $2 job to complete..."
+      sleep 1
+    done
+  fi
 
   echo "started $JOB"
   kubectl create -f "./jobs/$JOB.yaml"
@@ -71,19 +69,48 @@ run_job() {
     echo "Waiting for $JOB job to complete..."
     sleep 5
   done
+
+  touch /tmp/$JOB
 }
 
 echo "Starting $REPEAT-th run ..."
 
-PIDS=()
-for JOB_NAME in "${JOB_NAMES[@]}"; do
-  run_job "$JOB_NAME" &
-  PIDS+=($!)
-done
 
-for PID in "${PIDS[@]}"; do
-  wait $PID
-done
+# Start independent jobs
+run_job "parsec-blackscholes" & 
+BLACKSCHOLES_PID=$!
+
+run_job "parsec-canneal" & 
+CANNEAL_PID=$!
+
+run_job "parsec-freqmine" & 
+FREQMINE_PID=$!
+
+run_job "parsec-vips" &
+VIPS_PID=$!
+
+run_job "parsec-dedup" & 
+DEDUP_PID=$!
+
+run_job "parsec-radix" & 
+RADIX_PID=$!
+
+# Give the jobs time to start
+sleep 10
+
+run_job "parsec-ferret" "parsec-dedup" &
+FERRET_PID=$!
+
+
+# Wait for the initial jobs
+wait "$BLACKSCHOLES_PID"
+wait "$CANNEAL_PID"
+wait "$FERRET_PID"
+wait "$FREQMINE_PID"
+wait "$DEDUP_PID"
+wait "$RADIX_PID"
+wait "$VIPS_PID"
+
 
 echo "Jobs are finished"
 

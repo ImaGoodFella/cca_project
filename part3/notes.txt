@@ -42,3 +42,7 @@ A: e2-highmem-2 -> canneal
 B: n2-highcpu-2 -> memcache, blackscholes
 C: c3-highcpu-4 -> dedup/radix, freqmine
 D: n2-standard-4 -> vips, ferret
+
+Instructions (billions), FLOPS (billions), Memory Operations
+blackscholes: 407.41, 173.95, 132.75
+canneal: 45.81, 3.00, 12.

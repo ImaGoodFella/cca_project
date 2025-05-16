@@ -15,9 +15,9 @@ spec:
         args: ["-c", "taskset -c 0,1,2,3 ./run -a run -S parsec -p freqmine -i native -n 4"]
         resources:
           requests:
-            cpu: "2.6"
+            cpu: "3.6"
           limits:
-            cpu: "4"
+            cpu: "4.0"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-c-4core"
+        cca-project-nodetype: "node-d-4core"
