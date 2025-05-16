@@ -2,10 +2,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from collections import defaultdict
 import matplotlib.cm as cm
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import pandas as pd
-
 
 def plot_job_log_file(ax, log_file):
     with open(log_file, "r") as f:
@@ -77,7 +74,6 @@ def plot_job_log_file(ax, log_file):
     for i, job in enumerate(sorted_jobs):
         color = job_colors[job]
         for start, end in job_states[job]:
-            print(job, start, end - start, end)
             ax.barh(i, end - start, left=start, height=0.4, color=color)
         yticks.append(i)
         yticklabels.append(job)
@@ -92,52 +88,36 @@ def plot_job_log_file(ax, log_file):
     ax.xaxis.set_label_position('top')
     ax.tick_params(axis='x', which='both', bottom=False, top=True, labeltop=True, labelbottom=False)
 
-def plot_mcperf_p95(ax, log_file):
+def plot_mcperf_p95_qps(ax, log_file):
     df = pd.read_csv(log_file, sep=r'\s+', header=2)
     df['Timestamp'] = df.index * 10
 
-    # Plot p95 on the left y-axis
+    # Left y-axis: p95
     ax.axhline(y=800, color='r', linestyle='--', linewidth=1)
-
     ax.plot(df['Timestamp'], df['p95'], color='tab:blue', label='p95', linewidth=2)
     ax.set_ylabel('p95', color='tab:blue')
     ax.tick_params(axis='y', labelcolor='tab:blue')
 
-    # Title and show the plot
-    ax.set_title('p95 over Time')
-    ax.set_xlabel('Time (seconds)')
-    ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
-
-def plot_mcperf_qps(ax, log_file):
-    df = pd.read_csv(log_file, sep=r'\s+', header=2)
-    df['Timestamp'] = df.index * 10
-
-    # Create a second y-axis to plot QPS
+    # Right y-axis: QPS
     ax_twin = ax.twinx()
     ax_twin.plot(df['Timestamp'], df['QPS'], color='tab:green', label='QPS', linewidth=2)
     ax_twin.set_ylabel('QPS', color='tab:green')
     ax_twin.tick_params(axis='y', labelcolor='tab:green')
 
-    ax.yaxis.set_visible(False)  # Hide y-axis ticks and labels
-    ax.spines['left'].set_visible(False)  # Hide left spine (axis line)
-
-    # Title and show the plot
-    ax.set_title('QPS over Time')
     ax.set_xlabel('Time (seconds)')
     ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
+    ax.set_title('p95 and QPS over Time')
 
 if __name__ == "__main__":
 
     job_logs = ["task3_outfiles/jobs_1.txt", "task3_outfiles/jobs_2.txt", "task3_outfiles/jobs_3.txt"]
     mcperf_logs = ["task3_outfiles/mcperf_1.txt", "task3_outfiles/mcperf_2.txt", "task3_outfiles/mcperf_3.txt"]
     for idx, log_file in enumerate(job_logs):
-        fig, (ax_top, ax_middle, ax_bottom) = plt.subplots(
-            nrows=3, ncols=1, figsize=(12, 10), sharex=True, gridspec_kw={'height_ratios': [2, 1, 1]})
+        fig, (ax_top, ax_bottom) = plt.subplots(
+            nrows=2, ncols=1, figsize=(12, 8), sharex=True, gridspec_kw={'height_ratios': [2, 1]})
 
         plot_job_log_file(ax_top, log_file)
-        plot_mcperf_p95(ax_middle, mcperf_logs[idx])
-        plot_mcperf_qps(ax_bottom, mcperf_logs[idx])
+        plot_mcperf_p95_qps(ax_bottom, mcperf_logs[idx])
 
-        plt.grid(True)
         plt.tight_layout()
         plt.savefig(f"part4_3/plot_A{idx+1}.png")

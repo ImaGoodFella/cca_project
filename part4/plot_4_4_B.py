@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from collections import defaultdict
 import matplotlib.cm as cm
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import pandas as pd
 import re
 import os
@@ -121,9 +119,8 @@ def plot_cpu_cored(ax, job_log_file):
                     timestamps.append(t_sec)
                     core_counts.append(len(cores))
 
-    # === Plotting ===
-    print(timestamps, core_counts)
-    ax.plot(timestamps, core_counts, drawstyle='steps-post', marker='o', linewidth=2, label='memcached core count')
+    # Plot without dots (no marker)
+    ax.plot(timestamps, core_counts, drawstyle='steps-post', linewidth=2, label='memcached core count')
     ax.set_xlabel('Time (seconds)')
     ax.set_ylabel('Number of cores', color='tab:blue')
     ax.tick_params(axis='y', labelcolor='tab:blue')
