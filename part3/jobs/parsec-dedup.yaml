@@ -20,4 +20,4 @@ spec:
             cpu: "1.0"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-d-4core"
+        cca-project-nodetype: "node-c-4core"

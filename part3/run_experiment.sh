@@ -77,17 +77,18 @@ CANNEAL_PID=$!
 run_job "parsec-freqmine" & 
 FREQMINE_PID=$!
 
+run_job "parsec-dedup" &
+DEDUP_PID=$!
+
 run_job "parsec-radix" & 
 RADIX_PID=$!
 
 run_job "parsec-vips" &
 VIPS_PID=$!
 
+sleep 20
 run_job "parsec-ferret" &
 FERRET_PID=$!
-
-run_job "parsec-dedup" &
-DEDUP_PID=$!
 
 
 # Wait for the remaining jobs jobs

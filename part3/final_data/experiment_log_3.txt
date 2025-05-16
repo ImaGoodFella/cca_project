@@ -1,0 +1,1619 @@
++ echo 'Setting up memcached now'
+Setting up memcached now
++ kubectl create -f memcache.yaml
+pod/some-memcached created
++ kubectl expose pod some-memcached --name some-memcached-11211 --type LoadBalancer --port 11211 --protocol TCP
+service/some-memcached-11211 exposed
++ sleep 60
++ kubectl get service some-memcached-11211
+NAME                   TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)           AGE
+some-memcached-11211   LoadBalancer   100.71.215.121   34.79.216.204   11211:32043/TCP   61s
+++ kubectl get nodes --no-headers
+++ grep client-agent-a
+++ awk '{print $1}'
++ CLIENT_AGENT_A_NODE_NAME=client-agent-a-hmxf
+++ kubectl get nodes --no-headers
+++ grep client-agent-b
+++ awk '{print $1}'
++ CLIENT_AGENT_B_NODE_NAME=client-agent-b-973s
+++ kubectl get nodes --no-headers
+++ grep client-measure
+++ awk '{print $1}'
++ CLIENT_MEASURE_NODE_NAME=client-measure-v4dp
+++ kubectl get nodes client-agent-a-hmxf -o wide
+++ awk 'NR==2 {print $6}'
++ INTERNAL_AGENT_A_IP=10.0.16.3
+++ kubectl get nodes client-agent-b-973s -o wide
+++ awk 'NR==2 {print $6}'
++ INTERNAL_AGENT_B_IP=10.0.16.5
+++ kubectl get pods some-memcached -o wide
+++ awk 'NR==2 {print $6}'
++ MEMCACHED_IP=100.96.2.2
++ echo 'Starting mcperf agent on client-agent-a-hmxf...'
+Starting mcperf agent on client-agent-a-hmxf...
++ echo 'Starting mcperf agent on client-agent-b-973s...'
+Starting mcperf agent on client-agent-b-973s...
++ gcloud compute ssh --ssh-key-file /home/lorenzo/.ssh/cloud-computing ubuntu@client-agent-a-hmxf --zone europe-west1-b --command 'pkill mcperf || true; ./memcache-perf-dynamic/mcperf -T 2 -A'
++ sleep 20
++ gcloud compute ssh --ssh-key-file /home/lorenzo/.ssh/cloud-computing ubuntu@client-agent-b-973s --zone europe-west1-b --command 'pkill mcperf || true; ./memcache-perf-dynamic/mcperf -T 4 -A'
++ echo 'Starting measures on client-measure-v4dp...'
+Starting measures on client-measure-v4dp...
++ sleep 90
++ gcloud compute ssh --ssh-key-file /home/lorenzo/.ssh/cloud-computing ubuntu@client-measure-v4dp --zone europe-west1-b --command 'pkill mcperf || true; ./memcache-perf-dynamic/mcperf -s 100.96.2.2 --loadonly && ./memcache-perf-dynamic/mcperf -s 100.96.2.2 -a 10.0.16.3 -a 10.0.16.5 --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 --scan 30000:30500:5'
+Local QPS = 9636.7 (96367 / 10.0s) - 96367.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      182.1    70.1    80.4   114.6   123.5   172.3   195.7   209.3   219.1   231.3   248.0   275.0   353.1   656.4  2621.8   9636.7
+Local QPS = 19300.2 (193002 / 10.0s) - 193002.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      173.9    63.8    68.9   104.8   113.4   169.7   192.9   204.6   213.1   222.9   234.9   257.0   312.4   428.4  2530.5  19300.2
+Local QPS = 19376.2 (193762 / 10.0s) - 193762.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      180.9    79.9    68.9   100.0   108.3   173.1   204.6   220.1   230.8   244.1   261.8   289.7   347.0   707.3  2309.5  19376.2
+Local QPS = 9672.2 (96722 / 10.0s) - 96722.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      201.8    79.9    86.8   116.8   127.3   189.9   222.9   240.4   253.2   268.3   287.9   317.4   393.4   865.9  2656.7   9672.2
+Local QPS = 19352.7 (193527 / 10.0s) - 193527.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      170.0    98.3    74.4   100.7   108.9   164.9   190.2   202.5   211.5   221.1   232.9   252.2   297.4   436.0  2927.6  19352.7
+Local QPS = 9683.2 (96832 / 10.0s) - 96832.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      196.8   118.9    80.4   117.8   128.2   184.8   209.7   224.1   234.7   249.7   270.4   307.9   413.6   820.5  6543.0   9683.2
+Local QPS = 19404.8 (194048 / 10.0s) - 194048.0, 0.0
+Local QPS = 9712.6 (97126 / 10.0s) - 97126.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      191.8    83.2    80.4   116.7   127.6   180.3   203.5   217.6   228.6   241.8   261.6   297.3   418.3   852.7  3069.8   9712.6
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      171.9    99.6    74.4   104.2   112.0   166.1   190.8   203.0   212.1   222.1   234.3   254.8   306.0   440.4  3207.9  19404.8
+Local QPS = 9672.9 (96729 / 10.0s) - 96729.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      199.4    81.7    86.8   120.0   130.4   189.8   214.0   228.0   238.3   252.2   271.4   306.7   412.6   800.9  2553.0   9672.9
+Local QPS = 19308.5 (193085 / 10.0s) - 193085.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      171.1    81.3    74.4   101.4   109.0   165.2   191.6   204.6   213.7   224.0   235.5   255.5   307.8   460.1  3134.4  19308.5
+Local QPS = 19322.3 (193223 / 10.0s) - 193223.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      170.3    55.7    74.4   101.8   109.8   166.2   192.0   204.4   213.1   222.8   234.2   253.6   301.0   404.3  1597.6  19322.3
+Local QPS = 9699.7 (96997 / 10.0s) - 96997.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      196.9    92.5    80.4   118.7   129.3   188.7   212.9   226.3   235.2   248.2   265.3   294.7   386.3  1030.6  2837.6   9699.7
+Local QPS = 19339.2 (193392 / 10.0s) - 193392.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      171.5    55.5    68.9   100.7   109.3   168.1   193.6   205.9   214.5   224.6   235.9   256.7   311.1   414.1  1512.9  19339.2
+Local QPS = 9712.7 (97127 / 10.0s) - 97127.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      196.8    84.8    80.4   116.3   127.4   187.4   213.4   227.8   238.0   251.7   270.5   304.2   401.7   734.2  2750.2   9712.7
++ echo 'Starting 3-th run ...'
+Starting 3-th run ...
++ BLACKSCHOLES_PID=370867
++ run_job parsec-blackscholes
++ local JOB=parsec-blackscholes
++ CANNEAL_PID=370868
++ echo 'started parsec-blackscholes'
+started parsec-blackscholes
++ kubectl create -f ./jobs/parsec-blackscholes.yaml
++ run_job parsec-canneal
++ local JOB=parsec-canneal
++ echo 'started parsec-canneal'
+started parsec-canneal
++ kubectl create -f ./jobs/parsec-canneal.yaml
++ FREQMINE_PID=370869
++ run_job parsec-freqmine
++ local JOB=parsec-freqmine
++ echo 'started parsec-freqmine'
+started parsec-freqmine
++ kubectl create -f ./jobs/parsec-freqmine.yaml
++ DEDUP_PID=370872
++ run_job parsec-dedup
++ local JOB=parsec-dedup
++ echo 'started parsec-dedup'
+started parsec-dedup
++ kubectl create -f ./jobs/parsec-dedup.yaml
++ RADIX_PID=370874
++ run_job parsec-radix
++ local JOB=parsec-radix
++ echo 'started parsec-radix'
+started parsec-radix
++ kubectl create -f ./jobs/parsec-radix.yaml
++ VIPS_PID=370876
++ sleep 20
++ run_job parsec-vips
++ local JOB=parsec-vips
++ echo 'started parsec-vips'
+started parsec-vips
++ kubectl create -f ./jobs/parsec-vips.yaml
+job.batch/parsec-radix created
+job.batch/parsec-vips created
++ true
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+job.batch/parsec-freqmine created
+job.batch/parsec-canneal created
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+job.batch/parsec-blackscholes created
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+job.batch/parsec-dedup created
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ true
++ true
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ STATUS=Running
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
+Local QPS = 9694.5 (96945 / 10.0s) - 96945.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      235.0   174.1    80.4   122.7   134.3   202.6   233.6   253.4   270.2   292.2   329.7   417.1   985.4  2358.3  3912.4   9694.5
+Local QPS = 19251.8 (192518 / 10.0s) - 192518.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      207.7   164.1    68.9   103.3   112.2   179.6   209.8   227.0   240.0   258.5   290.2   366.0   914.8  2180.1  3132.3  19251.8
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ STATUS=Running
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-dedup --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ echo 'Waiting for parsec-radix job to complete...'
++ sleep 5
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ FERRET_PID=371762
++ wait 370867
++ run_job parsec-ferret
++ local JOB=parsec-ferret
++ echo 'started parsec-ferret'
+started parsec-ferret
++ kubectl create -f ./jobs/parsec-ferret.yaml
+job.batch/parsec-ferret created
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+Local QPS = 19333.5 (193335 / 10.0s) - 193335.0, 0.0
+Local QPS = 9726.8 (97268 / 10.0s) - 97268.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      205.4   122.6    86.8   119.3   129.7   189.8   216.4   231.2   242.8   257.0   277.2   316.9   486.6  2032.8  3941.4   9726.8
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      182.7   113.5    74.4   101.4   109.4   170.5   200.2   215.1   225.4   236.2   251.7   275.9   377.7  2004.6  3544.6  19333.5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ STATUS=Running
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-radix --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
+Local QPS = 19436.0 (194360 / 10.0s) - 194360.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      181.3   139.9    68.9   101.2   108.0   162.7   191.7   206.8   217.1   229.1   243.9   268.8   636.2  2190.5  3326.9  19436.0
+Local QPS = 9665.6 (96656 / 10.0s) - 96656.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      215.3   155.1    86.8   120.7   131.2   194.5   222.5   237.2   249.4   264.5   286.3   332.6   733.0  2342.6  3682.1   9665.6
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-canneal --no-headers
++ true
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ STATUS=Running
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ STATUS=Running
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-radix --no-headers
+++ kubectl get jobs parsec-dedup --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
+Local QPS = 19347.8 (193478 / 10.0s) - 193478.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      165.6    89.7    74.4    98.5   104.9   157.0   183.5   196.9   206.0   216.4   229.5   248.7   297.3  1187.4  3511.0  19347.8
+Local QPS = 9681.9 (96819 / 10.0s) - 96819.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      197.3   112.2    80.4   116.4   126.2   183.6   210.1   224.7   234.9   248.9   268.0   302.7   436.5  1826.7  3944.8   9681.9
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
++ true
++ true
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
++ STATUS=Running
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
+Local QPS = 19367.6 (193676 / 10.0s) - 193676.0, 0.0
+Local QPS = 9708.7 (97087 / 10.0s) - 97087.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      197.2    89.0    86.8   118.5   128.5   185.5   212.0   226.5   236.2   250.4   268.9   301.5   416.4  1324.2  2501.4   9708.7
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      168.1    75.6    74.4    98.7   105.4   159.7   187.8   201.6   211.4   222.1   234.5   253.8   308.6  1066.0  2282.4  19367.6
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-dedup --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
++ true
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-radix --no-headers
++ true
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ STATUS=Running
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
+Local QPS = 19383.0 (193831 / 10.0s) - 193831.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      176.7    99.2    74.4   100.1   107.3   167.5   197.9   212.7   222.6   233.6   248.3   270.1   332.1  1288.2  3721.7  19383.0
+Local QPS = 9670.5 (96705 / 10.0s) - 96705.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      200.0   103.5    86.8   117.8   128.1   185.8   213.0   228.2   239.0   253.1   272.9   310.0   449.6  1736.7  3106.6   9670.5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
++ true
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-radix job to complete...'
+Waiting for parsec-radix job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-dedup job to complete...'
+Waiting for parsec-dedup job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-radix --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-dedup --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Complete
++ '[' Complete == Complete ']'
++ break
++ STATUS=Complete
++ STATUS=Running
++ '[' Complete == Complete ']'
++ '[' Running == Complete ']'
++ break
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-vips job to complete...'
+Waiting for parsec-vips job to complete...
++ sleep 5
+Local QPS = 19365.0 (193650 / 10.0s) - 193650.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      162.8    83.6    74.4    96.9   103.0   154.8   180.8   193.7   202.1   212.3   224.7   243.6   294.7  1207.9  2648.7  19365.0
+Local QPS = 9669.9 (96699 / 10.0s) - 96699.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      190.8   102.9    80.4   114.1   123.0   176.9   201.9   217.3   228.6   242.4   262.1   294.9   412.0  1511.3  3274.8   9669.9
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-vips --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ echo 'Waiting for parsec-vips job to complete...'
++ sleep 5
+Waiting for parsec-vips job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-vips --no-headers
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Complete
++ '[' Complete == Complete ']'
++ break
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
+Local QPS = 9681.4 (96814 / 10.0s) - 96814.0, 0.0
+Local QPS = 19389.7 (193898 / 10.0s) - 193898.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      194.0   115.8    86.8   115.7   124.9   178.3   202.9   218.4   230.2   244.5   264.5   300.4   447.7  1788.9  4110.7   9681.4
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      173.8   105.2    74.4    99.8   106.7   163.0   192.6   207.1   216.7   227.9   241.2   262.3   320.3  1693.8  3786.7  19389.7
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
+Local QPS = 9756.5 (97565 / 10.0s) - 97565.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      196.0    98.2    86.8   117.8   127.4   181.7   207.1   222.6   233.7   248.9   269.7   306.8   434.3  1502.9  3171.8   9756.5
+Local QPS = 19471.6 (194716 / 10.0s) - 194716.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      167.3    85.0    74.4    97.9   104.4   159.1   186.3   199.7   209.2   219.6   232.6   252.3   307.6  1204.2  3053.7  19471.6
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
+Local QPS = 19447.5 (194475 / 10.0s) - 194475.0, 0.0
+Local QPS = 9693.5 (96935 / 10.0s) - 96935.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      191.8    96.4    86.8   116.9   126.3   178.8   202.5   217.5   228.8   242.6   262.2   294.8   406.0  1399.7  3576.3   9693.5
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      177.0    87.2    74.4   101.9   109.1   168.3   199.8   215.0   225.0   235.4   249.7   270.1   319.7  1087.1  3599.1  19447.5
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-ferret --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
+Waiting for parsec-blackscholes job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
+Local QPS = 19503.0 (195030 / 10.0s) - 195030.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      172.7   103.0    74.4    99.4   106.2   162.3   191.3   205.5   215.2   226.2   239.2   260.7   319.4  1418.6  3248.2  19503.0
+Local QPS = 9733.6 (97336 / 10.0s) - 97336.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      199.0   114.5    80.4   117.9   127.9   184.0   210.2   225.7   236.6   251.7   271.4   306.7   433.9  2019.9  3527.9   9733.6
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-blackscholes --no-headers
++ true
+++ awk '{print $2}'
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ STATUS=Running
++ STATUS=Running
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-blackscholes job to complete...'
++ echo 'Waiting for parsec-freqmine job to complete...'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-blackscholes job to complete...
+Waiting for parsec-freqmine job to complete...
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ sleep 5
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-blackscholes --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Complete
++ STATUS=Running
++ '[' Complete == Complete ']'
++ break
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ wait 370868
+Local QPS = 9741.9 (97419 / 10.0s) - 97419.0, 0.0
+Local QPS = 19299.0 (192991 / 10.0s) - 192991.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      199.9   104.5    80.4   113.1   123.9   183.6   211.1   227.9   240.8   257.8   282.6   327.1   467.6  1467.7  2951.6   9741.9
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      174.0    75.5    68.9   103.0   111.2   168.7   194.2   206.5   214.8   224.5   235.4   254.5   312.8  1073.3  2212.1  19299.0
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
+Local QPS = 9679.5 (96795 / 10.0s) - 96795.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      202.8    81.3    86.8   119.6   130.8   191.0   218.4   234.3   247.3   262.9   283.6   318.2   422.4   755.5  2942.5   9679.5
+Local QPS = 19421.4 (194214 / 10.0s) - 194214.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      176.6    74.0    74.4   104.8   113.2   171.1   196.5   209.2   217.5   228.0   240.9   265.2   326.9   768.0  2131.1  19421.4
++ true
++ true
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-freqmine job to complete...'
+Waiting for parsec-freqmine job to complete...
++ sleep 5
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-freqmine --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Complete
++ '[' Complete == Complete ']'
++ break
+Local QPS = 19407.1 (194071 / 10.0s) - 194071.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      176.0    65.5    74.4   102.2   110.8   172.3   199.2   212.1   220.7   230.4   242.8   262.4   314.3   463.6  2194.2  19407.1
+Local QPS = 9727.3 (97273 / 10.0s) - 97273.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      197.5    88.6    80.4   114.2   125.5   184.9   211.6   227.4   239.2   254.9   276.2   315.3   427.5   842.1  3255.7   9727.3
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
+Local QPS = 9669.9 (96699 / 10.0s) - 96699.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      199.0    76.7    86.8   119.2   130.3   187.3   212.9   228.1   239.4   254.4   274.5   314.1   422.3   739.6  2333.8   9669.9
+Local QPS = 19489.7 (194897 / 10.0s) - 194897.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      175.2    64.3    74.4   102.6   110.8   171.4   198.3   211.2   219.7   229.8   242.1   261.4   308.0   424.1  1851.3  19489.7
++ true
++ true
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-canneal job to complete...'
+Waiting for parsec-canneal job to complete...
++ sleep 5
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
++ true
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
+++ kubectl get jobs parsec-canneal --no-headers
+++ awk '{print $2}'
++ STATUS=Complete
++ '[' Complete == Complete ']'
++ break
++ wait 371762
++ STATUS=Running
++ '[' Running == Complete ']'
++ echo 'Waiting for parsec-ferret job to complete...'
+Waiting for parsec-ferret job to complete...
++ sleep 5
+Local QPS = 9702.6 (97026 / 10.0s) - 97026.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      196.1    81.5    80.4   120.2   130.7   184.9   209.2   223.6   234.2   249.0   268.4   301.8   395.1  1054.9  2750.5   9702.6
+Local QPS = 19380.1 (193801 / 10.0s) - 193801.0, 0.0
+#type       avg     std     min      p5     p10     p50     p67     p75     p80     p85     p90     p95     p99    p999   p9999 QPS
+read      168.7    71.0    74.4   100.7   108.5   163.5   188.9   201.1   210.0   219.2   231.3   250.2   296.3   540.2  2931.6  19380.1
++ true
+++ kubectl get jobs parsec-ferret --no-headers
+++ awk '{print $2}'
++ STATUS=Complete
++ '[' Complete == Complete ']'
++ break
++ wait 370869
++ wait 370872
++ wait 370874
++ wait 370876
++ echo 'Jobs are finished'
+Jobs are finished
++ kubectl get pods -o json
++ echo 'Killing measurements on client-measure-v4dp...'
+Killing measurements on client-measure-v4dp...
++ gcloud compute ssh --ssh-key-file /home/lorenzo/.ssh/cloud-computing ubuntu@client-measure-v4dp --zone europe-west1-b --command 'pkill mcperf || true'
++ echo 'End of run 3'
+End of run 3
+Local QPS = 9712.3 (97123 / 10.0s) - 97123.0, 0.0
+Local QPS = 19370.5 (193705 / 10.0s) - 193705.0, 0.0
+Connection to 34.79.164.211 closed by remote host.
+
+Recommendation: To check for possible causes of SSH connectivity issues and get
+recommendations, rerun the ssh command with the --troubleshoot option.
+
+gcloud compute ssh client-agent-a-hmxf --project=cca-eth-2025-group-2 --zone=europe-west1-b --ssh-key-file=/home/lorenzo/.ssh/cloud-computing --troubleshoot
+
+Or, to investigate an IAP tunneling issue:
+
+gcloud compute ssh client-agent-a-hmxf --project=cca-eth-2025-group-2 --zone=europe-west1-b --ssh-key-file=/home/lorenzo/.ssh/cloud-computing --troubleshoot --tunnel-through-iap
+
+ERROR: (gcloud.compute.ssh) [/usr/bin/ssh] exited with return code [255].
+Connection to 34.38.101.3 closed by remote host.
+
+Recommendation: To check for possible causes of SSH connectivity issues and get
+recommendations, rerun the ssh command with the --troubleshoot option.
+
+gcloud compute ssh client-agent-b-973s --project=cca-eth-2025-group-2 --zone=europe-west1-b --ssh-key-file=/home/lorenzo/.ssh/cloud-computing --troubleshoot
+
+Or, to investigate an IAP tunneling issue:
+
+gcloud compute ssh client-agent-b-973s --project=cca-eth-2025-group-2 --zone=europe-west1-b --ssh-key-file=/home/lorenzo/.ssh/cloud-computing --troubleshoot --tunnel-through-iap
+
+ERROR: (gcloud.compute.ssh) [/usr/bin/ssh] exited with return code [255].
