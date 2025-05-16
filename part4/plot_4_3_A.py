@@ -106,7 +106,7 @@ def plot_mcperf_p95_qps(ax, log_file):
 
     ax.set_xlabel('Time (seconds)')
     ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
-    ax.set_title('p95 and QPS over Time')
+    ax.set_title('Memcached p95 latency and QPS over Time')
 
 if __name__ == "__main__":
 

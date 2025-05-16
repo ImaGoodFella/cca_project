@@ -101,7 +101,7 @@ def plot_mcperf_combined(ax, log_file):
     ax.tick_params(axis='y', labelcolor='tab:blue')
     ax.set_xlabel('Time (seconds)')
     ax.grid(True, which='both', axis='x', linestyle='--', alpha=0.5)
-    ax.set_title('p95 and QPS over Time')
+    ax.set_title('Memcached p95 latency and QPS over Time')
 
     # Right axis: QPS
     ax_twin = ax.twinx()
