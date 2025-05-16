@@ -42,7 +42,7 @@ sleep 20
 echo "Starting measures on $CLIENT_MEASURE_NODE_NAME..."
 gcloud compute ssh --ssh-key-file ~/.ssh/cloud-computing "ubuntu@$CLIENT_MEASURE_NODE_NAME" --zone europe-west1-b \
   --command "pkill mcperf || true; ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP --loadonly && ./memcache-perf-dynamic/mcperf -s $MEMCACHED_IP -a $INTERNAL_AGENT_A_IP -a $INTERNAL_AGENT_B_IP --noload -T 6 -C 4 -D 4 -Q 1000 -c 4 -t 10 --scan 30000:30500:5" \
-  > "../data/part3/mcperf_measure_log_$REPEAT.txt" 2>&1 &
+  > "../data/part3/mcperf_$REPEAT.txt" 2>&1 &
 
 # Let the measurements stabilize
 sleep 90
@@ -50,13 +50,6 @@ sleep 90
 #Function to run and time a job
 run_job() {
   local JOB=$1
-
-  if [ -n "${2-}" ]; then
-    while [ ! -f "/tmp/$2" ]; do
-      echo "Waiting for $2 job to complete..."
-      sleep 1
-    done
-  fi
 
   echo "started $JOB"
   kubectl create -f "./jobs/$JOB.yaml"
@@ -69,8 +62,6 @@ run_job() {
     echo "Waiting for $JOB job to complete..."
     sleep 5
   done
-
-  touch /tmp/$JOB
 }
 
 echo "Starting $REPEAT-th run ..."
@@ -86,23 +77,20 @@ CANNEAL_PID=$!
 run_job "parsec-freqmine" & 
 FREQMINE_PID=$!
 
-run_job "parsec-vips" &
-VIPS_PID=$!
-
-run_job "parsec-dedup" & 
-DEDUP_PID=$!
-
 run_job "parsec-radix" & 
 RADIX_PID=$!
 
-# Give the jobs time to start
-sleep 10
+run_job "parsec-vips" &
+VIPS_PID=$!
 
-run_job "parsec-ferret" "parsec-dedup" &
+run_job "parsec-ferret" &
 FERRET_PID=$!
 
+run_job "parsec-dedup" &
+DEDUP_PID=$!
 
-# Wait for the initial jobs
+
+# Wait for the remaining jobs jobs
 wait "$BLACKSCHOLES_PID"
 wait "$CANNEAL_PID"
 wait "$FERRET_PID"
@@ -114,7 +102,7 @@ wait "$VIPS_PID"
 
 echo "Jobs are finished"
 
-kubectl get pods -o json > ../data/part3/results_$REPEAT.json 2>&1
+kubectl get pods -o json > ../data/part3/pods_$REPEAT.json 2>&1
 
 # Kill process on client-agent
 echo "Killing measurements on $CLIENT_MEASURE_NODE_NAME..."

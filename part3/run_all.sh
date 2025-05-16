@@ -7,7 +7,7 @@ username=lbenedett
 export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
 export PROJECT=$(gcloud config get-value project)
 
-for ((i=0; i<$NUM_REPEATS; i++))
+for ((i=1; i<=$NUM_REPEATS; i++))
 do
   bash setup_cluster.sh $i
   bash run_experiment.sh $i

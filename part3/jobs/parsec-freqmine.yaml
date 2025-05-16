@@ -15,7 +15,7 @@ spec:
         args: ["-c", "taskset -c 0,1,2,3 ./run -a run -S parsec -p freqmine -i native -n 4"]
         resources:
           requests:
-            cpu: "3.6"
+            cpu: "2.7"
           limits:
             cpu: "4.0"
       restartPolicy: Never

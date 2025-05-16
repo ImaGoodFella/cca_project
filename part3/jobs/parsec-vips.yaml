@@ -12,7 +12,7 @@ spec:
         name: parsec-vips
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["-c", "taskset -c 2,3 ./run -a run -S parsec -p vips -i native -n 2"]
+        args: ["-c", "taskset -c 1,2 ./run -a run -S parsec -p vips -i native -n 2"]
         resources:
           requests:
             cpu: "1.8"

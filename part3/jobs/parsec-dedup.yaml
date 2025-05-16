@@ -12,7 +12,7 @@ spec:
         name: parsec-dedup
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["-c", "taskset -c 1 ./run -a run -S parsec -p dedup -i native -n 1"]
+        args: ["-c", "taskset -c 0 ./run -a run -S parsec -p dedup -i native -n 1"]
         resources:
           requests:
             cpu: "0.8"
@@ -20,4 +20,4 @@ spec:
             cpu: "1.0"
       restartPolicy: Never
       nodeSelector:
-        cca-project-nodetype: "node-c-4core"
+        cca-project-nodetype: "node-d-4core"

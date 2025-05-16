@@ -13,7 +13,7 @@ spec:
       args: ["-c", "taskset -c 0 ./memcached -t 1 -u memcache"]
       resources:
         requests:
-          cpu: "0.9"
+          cpu: "0.8"
         limits:
           cpu: "1"
   nodeSelector:

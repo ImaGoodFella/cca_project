@@ -26,9 +26,9 @@ machines = {
 }
 
 def main(data_folder, num_runs):
-    for run in range(num_runs):
+    for run in range(1, num_runs + 1, 1):
         latency_df = pd.read_csv(
-            os.path.join(data_folder, f"mcperf_measure_log_{run}.txt"),
+            os.path.join(data_folder, f"mcperf_{run}.txt"),
             sep=r"\s+",
             engine="python",
             skipfooter=1,
@@ -38,7 +38,7 @@ def main(data_folder, num_runs):
         latency_df["ts_end"] /= 1000
         latency_df["duration"] = latency_df["ts_end"] - latency_df["ts_start"]
         
-        with open(os.path.join(data_folder, f"results_{run}.json"), "r") as f:
+        with open(os.path.join(data_folder, f"pods_{run}.json"), "r") as f:
             results = json.load(f)
         
         times = {}
@@ -137,7 +137,7 @@ def main(data_folder, num_runs):
 
         ax2.set_ylabel("Machine")
         ax2.set_yticks(range(len(nodes)))
-        ax2.set_yticklabels(map(lambda x: machines[x], nodes))
+        ax2.set_yticklabels(nodes)
 
         ax2.grid(visible=True, axis="x")
 

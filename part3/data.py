@@ -9,8 +9,8 @@ def main(data_folder, num_runs):
     convert = lambda time: int(datetime.strptime(time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp())
     total_durations = []
 
-    for run in range(num_runs):
-        filename = os.path.join(data_folder, f"results_{run}.json")
+    for run in range(1, num_runs + 1, 1):
+        filename = os.path.join(data_folder, f"pods_{run}.json")
         with open(filename, "r") as f:
             results = json.load(f)
 
