@@ -8,8 +8,15 @@ exec > >(tee -a ../data/part2b/setup_log.txt) 2>&1
 # Create the cluster
 echo "Creating the cluster now"
 
-PROJECT=`gcloud config get-value project`
-kops create -f part2b.yaml
+username=lbenedett
+
+export KOPS_STATE_STORE=gs://cca-eth-2025-group-2-$username/
+export PROJECT=$(gcloud config get-value project)
+
+temp_config=$(mktemp)
+envsubst < part2b.yaml > $temp_config
+
+kops create -f $temp_config
 
 # Setup ssh keys
 mkdir -p ~/.ssh
@@ -27,6 +34,3 @@ kops validate cluster --wait 10m
 kubectl get nodes -o wide
 
 echo "Cluster is up and running"
-
-PARSEC_SERVER_NAME=$(kubectl get nodes -o wide | grep parsec | awk '{print $1}')
-kubectl label nodes $PARSEC_SERVER_NAME cca-project-nodetype=parsec --overwrite
