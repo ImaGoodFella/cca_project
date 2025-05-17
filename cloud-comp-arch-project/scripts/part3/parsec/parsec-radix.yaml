@@ -10,17 +10,12 @@ spec:
       containers:
       - args:
         - -c
-        - ./run -a run -S splash2x -p radix -i native -n 1
+        - taskset -c 1 ./run -a run -S splash2x -p radix -i native -n 1
         command:
         - /bin/sh
         image: anakli/cca:splash2x_radix
         imagePullPolicy: Always
         name: parsec-radix
-        resources:
-          requests:
-            cpu: "332m"
-          limits:
-            cpu: "333m"
       nodeSelector:
-        cca-project-nodetype: node-a
+        cca-project-nodetype: node-d
       restartPolicy: Never

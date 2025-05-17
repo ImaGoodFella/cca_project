@@ -11,10 +11,7 @@ spec:
       imagePullPolicy: Always
       command: ["/bin/sh"]
       args: ["-c", "taskset -c 0 ./memcached -t 1 -u memcache"]
-      resources:
-        requests:
-          cpu: "1"
   nodeSelector:
-    cca-project-nodetype: node-d
+    cca-project-nodetype: node-a
 
 

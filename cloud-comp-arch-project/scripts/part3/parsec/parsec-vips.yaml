@@ -10,17 +10,12 @@ spec:
       containers:
       - args:
         - -c
-        - ./run -a run -S parsec -p vips -i native -n 1
+        - taskset -c 2 ./run -a run -S parsec -p vips -i native -n 1
         command:
         - /bin/sh
         image: anakli/cca:parsec_vips
         imagePullPolicy: Always
         name: parsec-vips
-        resources:
-          requests:
-            cpu: "666m"
-          limits:
-            cpu: "667m"
       nodeSelector:
-        cca-project-nodetype: node-a
+        cca-project-nodetype: node-d
       restartPolicy: Never

@@ -15,10 +15,10 @@ spec:
         - /bin/sh
         image: anakli/cca:parsec_canneal
         imagePullPolicy: Always
-        name: parsec-canneal
+        name: parsec-canneal 
         resources:
           requests:
-            cpu: "1.666"
+            cpu: "1666m"
       nodeSelector:
         cca-project-nodetype: node-b
       restartPolicy: Never
